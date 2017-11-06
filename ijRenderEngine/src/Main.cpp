@@ -1,5 +1,12 @@
+/*
+*                 Creates a window,handle the messages.
+*
+*                       Created by 78ij in 2017.11
+*/
+
 #include"Bases.h"
 #include"Pipeline.h"
+
 extern BYTE buffer[WIDTH * HEIGHT * 3];
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 IJWorld world;
@@ -8,12 +15,10 @@ bool isbuttondown;
 
 static HDC screen_hdc;
 static HWND screen_hwnd;
-static HDC hCompatibleDC; //兼容HDC  
-static HBITMAP hCompatibleBitmap; //兼容BITMAP  
-static HBITMAP hOldBitmap; //旧的BITMAP                   
-static BITMAPINFO binfo; //BITMAPINFO结构体  
-						 //Line(IJVector(-0.5,-1, 0, 0), IJVector(0.7,0.3, 0, 0));
-
+static HDC hCompatibleDC; 
+static HBITMAP hCompatibleBitmap; 
+static HBITMAP hOldBitmap;                 
+static BITMAPINFO binfo;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE HPrevInstance,
 	LPSTR lpCmdLine, int nCmdShow) {
@@ -24,11 +29,13 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE HPrevInstance,
 	world.camera.upwards = IJAuxVector(0, 0, 1);
 	world.camera.direction = IJAuxVector(-0.9, -0.7, -0.4);
 	world.camera.type = IJ_ORTHOGRAPHIC;
-	IJShape cube;
-	cube.data[0] = IJVector(0.9, 0.0, 0.0, 0.0);
-	cube.data[1] = IJVector(0.0, 0.9, 0.9, 0.0);
-	cube.type = IJ_CUBE;
-	world.shapes.push_back(cube);
+	IJShape sphere;
+    sphere.data[0] = IJVector(0.0, 0.0, 0.0, 0.0);
+	sphere.radius = 1;
+	sphere.type = IJ_SPHERE;
+	sphere.step[0] = 10;
+	sphere.step[1] = 20;
+	world.shapes.push_back(sphere);
 	IJPatch *patch = VertexShaderStage1(world);
 	patch = VertexShaderStage2(world, patch);
 	RasterizationStage1(world, patch);
@@ -67,7 +74,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE HPrevInstance,
 	UpdateWindow(hwnd);
 
 	ZeroMemory(&binfo, sizeof(BITMAPINFO));
-	binfo.bmiHeader.biBitCount = 24;      //每个像素多少位，也可直接写24(RGB)或者32(RGBA)  
+	binfo.bmiHeader.biBitCount = 24; 
 	binfo.bmiHeader.biCompression = BI_RGB;
 	binfo.bmiHeader.biHeight = HEIGHT;
 	binfo.bmiHeader.biPlanes = 1;
@@ -80,7 +87,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE HPrevInstance,
 	hCompatibleDC = CreateCompatibleDC(screen_hdc);
 	hCompatibleBitmap = CreateCompatibleBitmap(screen_hdc, WIDTH, HEIGHT);
 	hOldBitmap = (HBITMAP)SelectObject(hCompatibleDC, hCompatibleBitmap);
-	//将颜色数据打印到屏幕上，这下面两个函数每帧都得调用  
+
+	//These two functions must be called every time we refresh the output.
 	SetDIBits(screen_hdc, hCompatibleBitmap, 0, HEIGHT, buffer, (BITMAPINFO*)&binfo, DIB_RGB_COLORS);
 	BitBlt(screen_hdc, -1, -1, WIDTH, HEIGHT, hCompatibleDC, 0, 0, SRCCOPY);
 
@@ -121,10 +129,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		originy = HIWORD(lParam);
 		break;
 	case WM_MOUSEMOVE: {
+		int x = LOWORD(lParam);
+		int y = HIWORD(lParam);
 		if (isbuttondown == true) {
 			HDC hdc = GetDC(hwnd);
-			int x = LOWORD(lParam);
-			int y = HIWORD(lParam);
 			double offsetx = (double)(x - originx) / 399.5;
 			double offsety = (double)(y - originy) / 399.5;
 			for (int i = 0; i < WIDTH * HEIGHT * 3; i++) {
@@ -132,7 +140,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			}
 			world.camera.position = IJVector(
 				world.camera.position[0] + offsetx,
-				world.camera.position[1] + offsety,
+				world.camera.position[1] - offsety,
 				world.camera.position[2],
 				world.camera.position[3]
 			);
@@ -144,10 +152,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		SetDIBits(screen_hdc, hCompatibleBitmap, 0, HEIGHT, buffer, (BITMAPINFO*)&binfo, DIB_RGB_COLORS);
 		BitBlt(screen_hdc, -1, -1, WIDTH, HEIGHT, hCompatibleDC, 0, 0, SRCCOPY);
 		}
-		isbuttondown = false;
-		break;
 		originx = x;
 		originy = y;
+		break;
 	}
 	case WM_LBUTTONUP:
 		isbuttondown = false;
