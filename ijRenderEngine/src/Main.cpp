@@ -2,26 +2,38 @@
 #include"Pipeline.h"
 extern BYTE buffer[WIDTH * HEIGHT * 3];
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
+IJWorld world;
+int originx = 0, originy = 0;
+bool isbuttondown;
+
+static HDC screen_hdc;
+static HWND screen_hwnd;
+static HDC hCompatibleDC; //兼容HDC  
+static HBITMAP hCompatibleBitmap; //兼容BITMAP  
+static HBITMAP hOldBitmap; //旧的BITMAP                   
+static BITMAPINFO binfo; //BITMAPINFO结构体  
+						 //Line(IJVector(-0.5,-1, 0, 0), IJVector(0.7,0.3, 0, 0));
+
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE HPrevInstance,
 	LPSTR lpCmdLine, int nCmdShow) {
 	for (int i = 0; i < WIDTH * HEIGHT * 3; i++) {
 		buffer[i] = 255;
 	}
-	IJWorld world;
-	world.camera.position = IJVector(0, 0, 1, 0);
-	world.camera.upwards = IJAuxVector(0, 1, 0);
-	world.camera.direction = IJAuxVector(0, 0, -1);
+	world.camera.position = IJVector(1, 2, 0.5, 0);
+	world.camera.upwards = IJAuxVector(0, 0, 1);
+	world.camera.direction = IJAuxVector(-0.9, -0.7, -0.4);
 	world.camera.type = IJ_ORTHOGRAPHIC;
 	IJShape cube;
-	cube.data[0] = IJVector(1.0, 0.0, 0.0, 0.0);
-	cube.data[1] = IJVector(0.0, 1.0, 1.0, 0.0);
+	cube.data[0] = IJVector(0.9, 0.0, 0.0, 0.0);
+	cube.data[1] = IJVector(0.0, 0.9, 0.9, 0.0);
 	cube.type = IJ_CUBE;
 	world.shapes.push_back(cube);
 	IJPatch *patch = VertexShaderStage1(world);
 	patch = VertexShaderStage2(world, patch);
-	//RasterizationStage1(world, patch);
-
+	RasterizationStage1(world, patch);
+	//FreePatch(patch, world);
+	patch = NULL;
 	static TCHAR szAppName[] = TEXT("BitBlt");
 	HWND         hwnd;
 	MSG          msg;
@@ -45,8 +57,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE HPrevInstance,
 		return 0;
 	}
 
-	hwnd = CreateWindow(szAppName, TEXT("BitBlt Demo"),
-		WS_OVERLAPPEDWINDOW,
+	hwnd = CreateWindow(szAppName, TEXT("Rendering Demo"),
+		WS_OVERLAPPEDWINDOW^WS_THICKFRAME,
 		CW_USEDEFAULT, CW_USEDEFAULT,
 		WIDTH + 20, HEIGHT + 40,
 		NULL, NULL, hInstance, NULL);
@@ -54,13 +66,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE HPrevInstance,
 	ShowWindow(hwnd, nCmdShow);
 	UpdateWindow(hwnd);
 
-	static HDC screen_hdc;
-	static HWND screen_hwnd;
-	static HDC hCompatibleDC; //兼容HDC  
-	static HBITMAP hCompatibleBitmap; //兼容BITMAP  
-	static HBITMAP hOldBitmap; //旧的BITMAP                   
-	static BITMAPINFO binfo; //BITMAPINFO结构体  
-    Line(IJVector(-0.5,-1, 0, 0), IJVector(0.7,0.3, 0, 0));
 	ZeroMemory(&binfo, sizeof(BITMAPINFO));
 	binfo.bmiHeader.biBitCount = 24;      //每个像素多少位，也可直接写24(RGB)或者32(RGBA)  
 	binfo.bmiHeader.biCompression = BI_RGB;
@@ -88,7 +93,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE HPrevInstance,
 	return 0;
 }
 
-
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	static int  cxClient, cyClient, cxSource, cySource;
@@ -110,6 +114,44 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		cxClient = LOWORD(lParam);
 		cyClient = HIWORD(lParam);
 		return 0;
+	
+	case WM_LBUTTONDOWN:
+		isbuttondown = true;
+		originx = LOWORD(lParam);
+		originy = HIWORD(lParam);
+		break;
+	case WM_MOUSEMOVE: {
+		if (isbuttondown == true) {
+			HDC hdc = GetDC(hwnd);
+			int x = LOWORD(lParam);
+			int y = HIWORD(lParam);
+			double offsetx = (double)(x - originx) / 399.5;
+			double offsety = (double)(y - originy) / 399.5;
+			for (int i = 0; i < WIDTH * HEIGHT * 3; i++) {
+				buffer[i] = 255;
+			}
+			world.camera.position = IJVector(
+				world.camera.position[0] + offsetx,
+				world.camera.position[1] + offsety,
+				world.camera.position[2],
+				world.camera.position[3]
+			);
+		IJPatch *patch = VertexShaderStage1(world);
+		patch = VertexShaderStage2(world, patch);
+		RasterizationStage1(world, patch);
+		FreePatch(patch, world);
+		patch = NULL;
+		SetDIBits(screen_hdc, hCompatibleBitmap, 0, HEIGHT, buffer, (BITMAPINFO*)&binfo, DIB_RGB_COLORS);
+		BitBlt(screen_hdc, -1, -1, WIDTH, HEIGHT, hCompatibleDC, 0, 0, SRCCOPY);
+		}
+		isbuttondown = false;
+		break;
+		originx = x;
+		originy = y;
+	}
+	case WM_LBUTTONUP:
+		isbuttondown = false;
+		break;
 
 	case WM_DESTROY:
 		PostQuitMessage(0);
