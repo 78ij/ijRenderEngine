@@ -6,8 +6,15 @@
 #include <cmath>
 #include <vector>
 #include <new>
-#include<Windows.h>
+#include <Windows.h>
 #include "StdVector"
+
+
+//global configuration of Width and Size
+#define WIDTH                                               800
+#define HEIGHT                                              800
+
+
 
 //types of shape
 #define IJ_CUBE                                             0

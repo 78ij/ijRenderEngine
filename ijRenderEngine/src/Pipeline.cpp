@@ -1,5 +1,8 @@
 #include"Pipeline.h"
 
+//global buffer
+BYTE buffer[WIDTH * HEIGHT * 3];
+
 void DividePolygon(IJTriangle *triangle,IJVector a,IJVector b,IJVector c,IJVector d) {
 	triangle->data[0] = a;
 	triangle->data[1] = b;
@@ -8,7 +11,6 @@ void DividePolygon(IJTriangle *triangle,IJVector a,IJVector b,IJVector c,IJVecto
 	(triangle + 1)->data[1] = c;
 	(triangle + 1)->data[2] = d;
 }
-
 
 void CalculateCubeVertices(IJShape cube,IJVector *vertices) {
 	IJVector vertex1 = cube.data[0];
@@ -51,7 +53,9 @@ IJPatch *VertexShaderStage1(IJWorld world){
 		case IJ_CUBE: {
 			IJVector vertices[8];
 			IJTriangle *triangles = (IJTriangle *)calloc(12, sizeof(IJTriangle));
-			triangles = new(triangles) IJTriangle;
+			for (int i = 0; i < 12; i++) {
+				IJTriangle *triangle = new(triangles + i) IJTriangle;
+			}
 			CalculateCubeVertices(tempshape, vertices);
 			DividePolygon(triangles,vertices[0], vertices[3], vertices[2], vertices[1]);
 			DividePolygon(triangles + 2, vertices[0], vertices[4], vertices[5], vertices[1]);
@@ -108,4 +112,89 @@ IJPatch *VertexShaderStage2(IJWorld world, IJPatch *data) {
 		}
 	}
 	return data;
+}
+
+bool Linearithmatic(IJVector a, IJVector b, double c, double d) {
+	if ((a[1] - b[1]) * c +
+		(b[0] - a[0]) * d +
+		a[0] * b[1] -
+		b[0] * a[1] > 0) return true;
+	else return false;
+}
+
+void Line(IJVector a, IJVector b) {
+	a = a * 399.5 + IJVector(399.5, 399.5,0,0);
+	b = b * 399.5 + IJVector(399.5, 399.5,0,0);
+
+	double m = (b[1] - a[1]) / (b[0] - a[0]);
+	IJVector origin = a[0] > b[0] ? b : a;
+	IJVector destination = a[0] < b[0] ? b : a;
+
+	if (abs(m) <= 1) {
+		double start = min(a[0], b[0]);
+		double finish = max(a[0], b[0]);
+		double y0 = a[0] > b[0] ? b[1] : a[1];
+		double y1 = a[0] <= b[0] ? b[1] : a[1];
+		bool isbigger = ((y1 - y0) >= 0);
+		for (; start <= finish; start++) {
+			int st = start;
+			int y = y0;
+			buffer[(y * WIDTH + st) * 3] = 0;
+			buffer[(y * WIDTH + st) * 3 + 1] = 0;
+			buffer[(y * WIDTH + st) * 3 + 2] = 0;
+			if (isbigger) {
+				if (!Linearithmatic(origin, destination, start + 1, y0 + 0.5)) {
+					y0++;
+				}
+			}
+			if (!isbigger) {
+				if (Linearithmatic(origin, destination, start + 1, y0 + 0.5)) {
+					y0--;
+				}
+			}
+	    }
+	}
+	else {
+		double y0 = min(a[1], b[1]);
+		double y1 = max(a[1], b[1]);
+		double start = a[1] > b[1] ? b[0] : a[0];
+		double finish = a[1] <= b[1] ? b[0] : a[0];
+		bool isbigger = ((finish - start) >= 0);
+		for (; y0 <= y1; y0++) {
+			int st = start;
+			int y = y0;
+			buffer[(y * WIDTH + st) * 3] = 0;
+			buffer[(y * WIDTH + st) * 3 + 1] = 0;
+			buffer[(y * WIDTH + st) * 3 + 2] = 0;
+			if (isbigger) {
+				if (Linearithmatic(origin, destination, start + 1, y0 + 0.5)) {
+					start++;
+				}
+			}
+			if (!isbigger) {
+				if (!Linearithmatic(origin, destination, start + 1, y0 + 0.5)) {
+					start--;
+				}
+			}
+		}
+	}
+}
+
+
+
+
+IJPatch *RasterizationStage1(IJWorld world, IJPatch *data) {
+	IJuint size = world.shapes.size();
+	for (int shapecount = 0; shapecount < size; shapecount++) {
+		IJuint patchsize = (data + shapecount)->size;
+		for (int primitivecount = 0; primitivecount < patchsize; primitivecount++) {
+			Line(((data + shapecount)->data + primitivecount)->data[0],
+				((data + shapecount)->data + primitivecount)->data[1]);
+			Line(((data + shapecount)->data + primitivecount)->data[1],
+				((data + shapecount)->data + primitivecount)->data[2]);
+			Line(((data + shapecount)->data + primitivecount)->data[2],
+				((data + shapecount)->data + primitivecount)->data[0]);
+		}
+	}
+	return NULL;
 }
