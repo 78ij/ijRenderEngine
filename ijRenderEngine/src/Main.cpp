@@ -12,7 +12,8 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 IJWorld world;
 int originx = 0, originy = 0;
 bool isbuttondown;
-
+IJPatch *patch;
+IJPatch *patch2;
 static HDC screen_hdc;
 static HWND screen_hwnd;
 static HDC hCompatibleDC; 
@@ -25,26 +26,32 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE HPrevInstance,
 	for (int i = 0; i < WIDTH * HEIGHT * 3; i++) {
 		buffer[i] = 255;
 	}
-	world.camera.position = IJVector(1, 1, 0,1);
-	world.camera.upwards = IJAuxVector(0, 0, 1);
+	world.camera.position = IJVector(1, 1, -0.3,1);
+	world.camera.upwards = IJAuxVector(-0.1, 0.1, 1);
 	world.camera.direction = IJAuxVector(-1, -1, 0.4);
 	world.camera.type = IJ_ORTHOGRAPHIC;
 	IJShape sphere;
     sphere.data[0] = IJVector(0.0, 0.0, 0.0, 1.0);
 	sphere.radius = 0.7;
 	sphere.type = IJ_SPHERE;
-	sphere.step[0] = 30;
-	sphere.step[1] = 30;
+	sphere.step[0] = 10;
+	sphere.step[1] = 20;
+	sphere.color[0] = 153;
+	sphere.color[1] = 132;
+	sphere.color[3] = 133;
 	world.shapes.push_back(sphere);
-	/*IJShape cube;
+	IJShape cube;
 	cube.data[0] = IJVector(1.0, 0.0, 0.0, 1.0);
 	cube.data[1] = IJVector(0.0, 1.0, 1.0, 1.0);
+	cube.color[0] = 153;
+	cube.color[1] = 132;
+	cube.color[3] = 133;
 	cube.type = IJ_CUBE;
-	world.shapes.push_back(cube);*/
-	IJPatch *patch = VertexShaderStage1(world);
+	world.shapes.push_back(cube);
+    patch = VertexShaderStage1(world);
 	patch = VertexShaderStage2(world, patch);
 	RasterizationStage1(world, patch);
-	FreePatch(patch, world);
+	FreePatch(patch,world);
 	patch = NULL;
 	//Line(IJVector(1,-1,0,0), IJVector(-1,1,0,0));
 	static TCHAR szAppName[] = TEXT("BitBlt");
@@ -150,7 +157,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 				world.camera.position[2],
 				world.camera.position[3]
 			);
-		IJPatch *patch = VertexShaderStage1(world);
+		patch = VertexShaderStage1(world);
 		patch = VertexShaderStage2(world, patch);
 		RasterizationStage1(world, patch);
 		FreePatch(patch, world);

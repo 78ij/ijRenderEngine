@@ -66,75 +66,57 @@ bool Linearithmatic(IJVector a, IJVector b, double c, double d) {
 		b[0] * a[1] > 0) return true;
 	else return false;
 }
-
-void Line(IJVector a, IJVector b) {
+void Bresenhamline(int x1, int y1, int x2, int y2, IJColor *color) {
+	int x, y, dx, dy, s1, s2, p, temp, interchange, i; 
+	x = x1; 
+	y = y1;   
+	dx = abs(x2 - x1); 
+	dy = abs(y2 - y1);  
+	if (x2>x1)   s1 = 1; 
+	else   s1 = -1;  
+	if (y2>y1)   s2 = 1;
+	else   s2 = -1;   
+	if (dy>dx) { 
+		temp = dx;  
+		dx = dy;
+		dy = temp;   
+		interchange = 1; 
+	}
+	else  
+		interchange = 0;  
+	p = (dy << 1) - dx; 
+	for (i = 1; i <= dx; i++) {
+		if (((y * WIDTH + x) * 3 + 2) >(WIDTH * HEIGHT * 3 - 1)) continue;
+		if ((y * WIDTH + x) * 3 + 2 < 0) continue;
+		if (y >= WIDTH - 1 || x >= WIDTH - 1) continue;
+		if (y < 0 || x < 0) continue;
+		buffer[(y * WIDTH + x) * 3] = color[0];
+		buffer[(y * WIDTH + x) * 3 + 1] = color[1];
+		buffer[(y * WIDTH + x) * 3 + 2] = color[2];
+		if (p >= 0) {
+			if (interchange == 0) 
+				y = y + s2; 
+			else    
+				x = x + s1;
+			p = p -(dx << 1);
+		}
+		else { 
+			if (interchange == 0) 
+				x = x + s1; 
+			else   
+				y = y + s2;  
+			p = p + (dy << 1);  
+		}
+	}
+}
+void Line(IJVector a, IJVector b,IJColor *color) {
 	a = a * 399.5 + IJVector(399.5, 399.5, 0, 0);
 	b = b * 399.5 + IJVector(399.5, 399.5, 0, 0);
-
-	double m = (b[1] - a[1]) / (b[0] - a[0]);
-	IJVector origin = a[0] > b[0] ? b : a;
-	IJVector destination = a[0] < b[0] ? b : a;
-
-	if (abs(m) <= 1) {
-		double start = min(a[0], b[0]);
-		double finish = max(a[0], b[0]);
-		double y0 = a[0] > b[0] ? b[1] : a[1];
-		double y1 = a[0] <= b[0] ? b[1] : a[1];
-		bool isbigger = ((y1 - y0) >= 0);
-		int st = start;
-		int y = y0;
-		for (; start <= finish; start++) {
-			st = start;
-			y = y0;
-			if (isbigger) {
-				if (!Linearithmatic(origin, destination, start + 1, y0 + 0.5)) {
-					y0++;
-				}
-			}
-			if (!isbigger) {
-				if (Linearithmatic(origin, destination, start + 1, y0 + 0.5)) {
-					y0--;
-
-				}
-			}
-			if (((y * WIDTH + st) * 3 + 2) >(WIDTH * HEIGHT * 3 - 1)) continue;
-			if ((y * WIDTH + st) * 3 + 2 < 0) continue;
-			if (y >= WIDTH - 1 || st >= WIDTH - 1) continue;
-			if (y < 0 || st < 0) continue;
-			buffer[(y * WIDTH + st) * 3] = 0;
-			buffer[(y * WIDTH + st) * 3 + 1] = 0;
-			buffer[(y * WIDTH + st) * 3 + 2] = 0;
-		}
-	}
-	else {
-		double y0 = min(a[1], b[1]);
-		double y1 = max(a[1], b[1]);
-		double start = a[1] > b[1] ? b[0] : a[0];
-		double finish = a[1] <= b[1] ? b[0] : a[0];
-		bool isbigger = ((finish - start) >= 0);
-		for (; y0 <= y1; y0++) {
-			int st = start;
-			int y = y0;
-
-			if (isbigger) {
-				if (Linearithmatic(origin, destination, start + 1, y0 + 0.5)) {
-					start++;
-				}
-			}
-			if (!isbigger) {
-				if (Linearithmatic(origin, destination, start + 1, y0 + 0.5)) {
-					start--;
-				}
-			}
-			if ((y * WIDTH + st) * 3 + 2 > WIDTH * HEIGHT * 3 - 1) continue;
-			if ((y * WIDTH + st) * 3 + 2 < 0)continue;
-			if (y > WIDTH - 1 || st > WIDTH - 1) continue;
-			if (y < 0 || st < 0) continue;
-			buffer[(y * WIDTH + st) * 3] = 0;
-			buffer[(y * WIDTH + st) * 3 + 1] = 0;
-			buffer[(y * WIDTH + st) * 3 + 2] = 0;
-		}
-	}
+	int x1 = a[0];
+	int x2 = b[0];
+	int y1 = a[1];
+	int y2 = b[1];
+	Bresenhamline(x1, y1, x2, y2, color);
 }
 
 //---------------------------------------------------
@@ -165,6 +147,9 @@ IJPatch *VertexShaderStage1(IJWorld world){
 			IJTriangle *triangles = (IJTriangle *)calloc(12, sizeof(IJTriangle));
 			for (int i = 0; i < 12; i++) {
 				IJTriangle *triangle = new(triangles + i) IJTriangle;
+				triangle->color[0] = tempshape.color[0];
+				triangle->color[0] = tempshape.color[1];
+				triangle->color[0] = tempshape.color[2];
 			}
 			CalculateCubeVertices(tempshape, vertices);
 			DividePolygon(triangles,vertices[0], vertices[3], vertices[2], vertices[1]);
@@ -180,13 +165,16 @@ IJPatch *VertexShaderStage1(IJWorld world){
 		}
 		case IJ_SPHERE: {
 			IJuint ustep = tempshape.step[0];
-			IJuint vstep = tempshape.step[1] - 1;
+			IJuint vstep = tempshape.step[1];
 			IJTriangle *triangles = (IJTriangle *)calloc(((vstep - 1) * ustep) * 2, sizeof(IJTriangle));
 			for (int i = 0; i < ((vstep - 1) * ustep) * 2; i++) {
 				IJTriangle *triangle2 = new(triangles + i) IJTriangle;
+				triangle2->color[0] = tempshape.color[0];
+				triangle2->color[0] = tempshape.color[1];
+				triangle2->color[0] = tempshape.color[2];
 			}
 			double ustepinterval = 1 / (double)ustep;
-			double vstepinterval = 1 / (double)vstep;
+			double vstepinterval = 1 / (double)(vstep -1 );
 			// the triangles at bottom
 			double u = 0, v = 0;
 			for (int i = 0; i < ustep; i++) {
@@ -235,11 +223,14 @@ IJPatch *RasterizationStage1(IJWorld world, IJPatch *data) {
 		IJuint patchsize = (data + shapecount)->size;
 		for (int primitivecount = 0; primitivecount < patchsize; primitivecount++) {
 			Line(((data + shapecount)->data + primitivecount)->data[0],
-				((data + shapecount)->data + primitivecount)->data[1]);
+				((data + shapecount)->data + primitivecount)->data[1],
+				((data + shapecount)->data + primitivecount)->color);
 			Line(((data + shapecount)->data + primitivecount)->data[1],
-				((data + shapecount)->data + primitivecount)->data[2]);
+				((data + shapecount)->data + primitivecount)->data[2],
+				((data + shapecount)->data + primitivecount)->color);
 			Line(((data + shapecount)->data + primitivecount)->data[2],
-				((data + shapecount)->data + primitivecount)->data[0]);
+				((data + shapecount)->data + primitivecount)->data[0],
+				((data + shapecount)->data + primitivecount)->color);
 		}
 	}
 	return NULL;
