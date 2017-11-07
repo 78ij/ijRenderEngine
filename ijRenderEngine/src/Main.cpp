@@ -25,22 +25,28 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE HPrevInstance,
 	for (int i = 0; i < WIDTH * HEIGHT * 3; i++) {
 		buffer[i] = 255;
 	}
-	world.camera.position = IJVector(1, 2, 0.5, 0);
+	world.camera.position = IJVector(1, 1, 0,1);
 	world.camera.upwards = IJAuxVector(0, 0, 1);
-	world.camera.direction = IJAuxVector(-0.9, -0.7, -0.4);
+	world.camera.direction = IJAuxVector(-1, -1, 0.4);
 	world.camera.type = IJ_ORTHOGRAPHIC;
 	IJShape sphere;
-    sphere.data[0] = IJVector(0.0, 0.0, 0.0, 0.0);
-	sphere.radius = 1;
+    sphere.data[0] = IJVector(0.0, 0.0, 0.0, 1.0);
+	sphere.radius = 0.7;
 	sphere.type = IJ_SPHERE;
-	sphere.step[0] = 10;
-	sphere.step[1] = 20;
+	sphere.step[0] = 30;
+	sphere.step[1] = 30;
 	world.shapes.push_back(sphere);
+	/*IJShape cube;
+	cube.data[0] = IJVector(1.0, 0.0, 0.0, 1.0);
+	cube.data[1] = IJVector(0.0, 1.0, 1.0, 1.0);
+	cube.type = IJ_CUBE;
+	world.shapes.push_back(cube);*/
 	IJPatch *patch = VertexShaderStage1(world);
 	patch = VertexShaderStage2(world, patch);
 	RasterizationStage1(world, patch);
-	//FreePatch(patch, world);
+	FreePatch(patch, world);
 	patch = NULL;
+	//Line(IJVector(1,-1,0,0), IJVector(-1,1,0,0));
 	static TCHAR szAppName[] = TEXT("BitBlt");
 	HWND         hwnd;
 	MSG          msg;

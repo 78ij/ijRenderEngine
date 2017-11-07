@@ -29,7 +29,7 @@ IJVector getPoint(double u, double v, IJVector center,double radius){
 	return IJVector(center[0] + x,
 		center[1] + y,
 		center[2] + z,
-		center[3]);
+		1.0);
 }
 
 void DividePolygon(IJTriangle *triangle,IJVector a,IJVector b,IJVector c,IJVector d) {
@@ -122,7 +122,7 @@ void Line(IJVector a, IJVector b) {
 				}
 			}
 			if (!isbigger) {
-				if (!Linearithmatic(origin, destination, start + 1, y0 + 0.5)) {
+				if (Linearithmatic(origin, destination, start + 1, y0 + 0.5)) {
 					start--;
 				}
 			}
@@ -180,41 +180,44 @@ IJPatch *VertexShaderStage1(IJWorld world){
 		}
 		case IJ_SPHERE: {
 			IJuint ustep = tempshape.step[0];
-			IJuint vstep = tempshape.step[1];
+			IJuint vstep = tempshape.step[1] - 1;
 			IJTriangle *triangles = (IJTriangle *)calloc(((vstep - 1) * ustep) * 2, sizeof(IJTriangle));
+			for (int i = 0; i < ((vstep - 1) * ustep) * 2; i++) {
+				IJTriangle *triangle2 = new(triangles + i) IJTriangle;
+			}
 			double ustepinterval = 1 / (double)ustep;
 			double vstepinterval = 1 / (double)vstep;
 			// the triangles at bottom
 			double u = 0, v = 0;
 			for (int i = 0; i < ustep; i++) {
-				IJTriangle *triangle = new(triangles + i) IJTriangle;
-				triangle->data[0] = getPoint(0, 0, tempshape.data[0], tempshape.radius);
-				triangle->data[1] = getPoint(u, vstepinterval, tempshape.data[0], tempshape.radius);
-				triangle->data[2] = getPoint(u + ustepinterval, vstepinterval, tempshape.data[0], tempshape.radius);
+				IJTriangle *triangle = triangles + i;
+				triangle->data[0] = getPoint(u + ustepinterval, vstepinterval, tempshape.data[0], tempshape.radius);
+				triangle->data[1] = getPoint(0, 0, tempshape.data[0], tempshape.radius);
+				triangle->data[2] = getPoint(u, vstepinterval, tempshape.data[0], tempshape.radius);
+				u += ustepinterval;
 			}
 			// the polygons of in the middle
 			u = 0, v = vstep;
-			IJTriangle * triangle1 = new(triangles + ustep) IJTriangle;
-			IJTriangle * triangle2 = new(triangles + ustep + 1) IJTriangle;
+			IJTriangle * triangle1 = triangles + ustep;
 			for (int i = 1; i < vstep - 1; i++) {
 				for (int j = 0; j < ustep; j++) {
 					DividePolygon(triangle1, getPoint(u, v, tempshape.data[0], tempshape.radius),
-						getPoint(u + ustepinterval, v, tempshape.data[0], tempshape.radius),
+						getPoint(u, v + vstepinterval, tempshape.data[0], tempshape.radius),
 						getPoint(u + ustepinterval, v + vstepinterval, tempshape.data[0], tempshape.radius),
-						getPoint(u, v + vstepinterval, tempshape.data[0], tempshape.radius));
+						getPoint(u + ustepinterval, v, tempshape.data[0], tempshape.radius));
 					u += ustepinterval;
-					triangle1 = new(triangles + i + j) IJTriangle;
-					triangle2 = new(triangles + i + j + 1) IJTriangle;
+					triangle1 += 2;
 				}
 				v += vstepinterval;
 		    }
-			// the polygons on the top
+			// the triangles on the top
 			u = 0;
 			for (int i = 0; i < ustep; i++) {
-				IJTriangle *triangle = new(triangles + ((vstep - 1) * ustep) * 2 - ustep + i) IJTriangle;
+				IJTriangle *triangle = triangles + ((vstep - 1) * ustep) * 2 - ustep + i;
 				triangle->data[0] = getPoint(0, 1, tempshape.data[0], tempshape.radius);
 				triangle->data[1] = getPoint(u, 1 - vstepinterval, tempshape.data[0], tempshape.radius);
 				triangle->data[2] = getPoint(u + ustepinterval, 1 - vstepinterval, tempshape.data[0], tempshape.radius);
+			    u += ustepinterval;
 			}
 			IJPatch *patch = new(ret + shapecount) IJPatch;
 			patch->data = triangles;
@@ -224,6 +227,22 @@ IJPatch *VertexShaderStage1(IJWorld world){
 		}
 		return ret;
 	}
+}
+
+IJPatch *RasterizationStage1(IJWorld world, IJPatch *data) {
+	IJuint size = world.shapes.size();
+	for (int shapecount = 0; shapecount < size; shapecount++) {
+		IJuint patchsize = (data + shapecount)->size;
+		for (int primitivecount = 0; primitivecount < patchsize; primitivecount++) {
+			Line(((data + shapecount)->data + primitivecount)->data[0],
+				((data + shapecount)->data + primitivecount)->data[1]);
+			Line(((data + shapecount)->data + primitivecount)->data[1],
+				((data + shapecount)->data + primitivecount)->data[2]);
+			Line(((data + shapecount)->data + primitivecount)->data[2],
+				((data + shapecount)->data + primitivecount)->data[0]);
+		}
+	}
+	return NULL;
 }
 
 IJPatch *VertexShaderStage2(IJWorld world, IJPatch *data) {
@@ -263,21 +282,4 @@ IJPatch *VertexShaderStage2(IJWorld world, IJPatch *data) {
 		}
 	}
 	return data;
-}
-
-
-IJPatch *RasterizationStage1(IJWorld world, IJPatch *data) {
-	IJuint size = world.shapes.size();
-	for (int shapecount = 0; shapecount < size; shapecount++) {
-		IJuint patchsize = (data + shapecount)->size;
-		for (int primitivecount = 0; primitivecount < patchsize; primitivecount++) {
-			Line(((data + shapecount)->data + primitivecount)->data[0],
-				((data + shapecount)->data + primitivecount)->data[1]);
-			Line(((data + shapecount)->data + primitivecount)->data[1],
-				((data + shapecount)->data + primitivecount)->data[2]);
-			Line(((data + shapecount)->data + primitivecount)->data[2],
-				((data + shapecount)->data + primitivecount)->data[0]);
-		}
-	}
-	return NULL;
 }
