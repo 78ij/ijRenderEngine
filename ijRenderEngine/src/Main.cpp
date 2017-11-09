@@ -8,6 +8,7 @@
 #include"Pipeline.h"
 
 extern BYTE buffer[WIDTH * HEIGHT * 3];
+extern IJint depthbuffer[WIDTH * HEIGHT];
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 IJWorld world;
 int originx = 0, originy = 0;
@@ -26,6 +27,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE HPrevInstance,
 	for (int i = 0; i < WIDTH * HEIGHT * 3; i++) {
 		buffer[i] = 255;
 	}
+	for (int i = 0; i < WIDTH * HEIGHT; i++) {
+		depthbuffer[i] = -500;
+	}
 	world.camera.position = IJVector(1,1, 0.4,1);
 	world.camera.upwards = IJAuxVector(-0.1, -0.2, 1);
 	world.camera.direction = IJAuxVector(-1, -1, -0.5);
@@ -35,7 +39,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE HPrevInstance,
 	sphere.radius = 0.7;
 	sphere.type = IJ_SPHERE;
 	sphere.step[0] = 20;
-	sphere.step[1] = 20;
+	sphere.step[1] = 40;
 	sphere.color[0] = 153;
 	sphere.color[1] = 132;
 	sphere.color[3] = 133;
@@ -65,7 +69,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE HPrevInstance,
 	wndclass.cbClsExtra = 0;
 	wndclass.cbWndExtra = 0;
 	wndclass.hInstance = hInstance;
-	wndclass.hIcon = LoadIcon(NULL, IDI_INFORMATION);
+	wndclass.hIcon = LoadIcon(NULL, IDI_WINLOGO);
 	wndclass.hCursor = LoadCursor(NULL, IDC_ARROW);
 	wndclass.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
 	wndclass.lpszMenuName = NULL;

@@ -59,7 +59,8 @@ struct IJShape {
 struct IJTriangle {
 	IJVector data[3];
 	IJColor  color[3];
-	double zbuffer;
+	IJVector uniform[3];
+	IJint zbuffer;
 };
 
 struct IJPatch {
@@ -74,14 +75,16 @@ struct IJCamera {
 	IJuint type;
 };
 
+struct IJLight {
+	IJVector position;
+};
+
 struct IJWorld {
 	std::vector<IJShape> shapes;
 	IJCamera camera;
+	IJLight light;
 };
 
-struct IJLight {
-	IJVector position;
-	IJAuxVector direction;
-};
+
 #endif
 
