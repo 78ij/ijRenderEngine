@@ -8,11 +8,12 @@
 #define BASE_H
 
 #include "Dense"
+#include "StdVector"
 #include <cmath>
 #include <vector>
 #include <new>
+#include <algorithm>
 #include <Windows.h>
-#include "StdVector"
 
 
 //global configuration of Width and Size and PI
@@ -78,5 +79,9 @@ struct IJWorld {
 	IJCamera camera;
 };
 
+struct IJLight {
+	IJVector position;
+	IJAuxVector direction;
+};
 #endif
 

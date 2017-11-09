@@ -12,6 +12,227 @@ BYTE buffer[WIDTH * HEIGHT * 3];
 //---------------------------------------------------
 //Auxiliry functions used to calculate vertices,etc
 //---------------------------------------------------
+inline void swap(int &x1, int &x2) {
+	int temp = x1;
+	x1 = x2;
+	x2 = temp;
+}
+bool compare(IJVector a, IJVector b) {
+	return a[1] > b[1];
+}
+void drawOneLine(int x1, int y1, int x2, int y2, IJColor *color)
+{
+	if (x2<x1)
+	{
+		swap(x2, x1);
+		swap(y2, y1);
+	}
+	int x, y;
+	x = x1;
+	y = y1;
+	// pallel to the axis
+	if (y1 == y2)
+	{
+		//pallel to x
+		while (x<x2)
+		{
+			x++;
+			if (((y * WIDTH + x) * 3 + 2) >(WIDTH * HEIGHT * 3 - 1)) continue;
+			if ((y * WIDTH + x) * 3 + 2 < 0) continue;
+			if (y >= WIDTH - 1 || x >= WIDTH - 1) continue;
+			if (y < 0 || x < 0) continue;
+			buffer[(y * WIDTH + x) * 3] = color[0];
+			buffer[(y * WIDTH + x) * 3 + 1] = color[1];
+			buffer[(y * WIDTH + x) * 3 + 2] = color[2];
+		}
+		return;
+	}
+	if (x1 == x2)
+	{
+		//pallel to y
+		if (y1 > y2) {
+			y = y2;
+			y2 = y1;
+		}
+		while (y<y2)
+		{
+			y++;
+			if (((y * WIDTH + x) * 3 + 2) >(WIDTH * HEIGHT * 3 - 1)) continue;
+			if ((y * WIDTH + x) * 3 + 2 < 0) continue;
+			if (y >= WIDTH - 1 || x >= WIDTH - 1) continue;
+			if (y < 0 || x < 0) continue;
+			buffer[(y * WIDTH + x) * 3] = color[0];
+			buffer[(y * WIDTH + x) * 3 + 1] = color[1];
+			buffer[(y * WIDTH + x) * 3 + 2] = color[2];
+		}
+		return;
+	}
+	int dx = x2 - x1, dy = y2 - y1;
+	int p;
+	int twoDy = 2 * dy, twoMinusDx = 2 * (dy - dx), twoDx = 2 * dx, twoMinusDy = 2 * (dx - dy);
+	int twoSum = 2 * (dy + dx);
+	double k = (double)dy / (double)dx;
+
+	//0<k<1
+	if (k<1.0&&k>0.0)
+	{
+		p = 2 * dy - dx;
+		while (x<x2)
+		{
+			x++;
+			if (p<0)
+				p += twoDy;
+			else
+			{
+				y++;
+				p += twoMinusDx;
+			}
+			if (((y * WIDTH + x) * 3 + 2) >(WIDTH * HEIGHT * 3 - 1)) continue;
+			if ((y * WIDTH + x) * 3 + 2 < 0) continue;
+			if (y >= WIDTH - 1 || x >= WIDTH - 1) continue;
+			if (y < 0 || x < 0) continue;
+			buffer[(y * WIDTH + x) * 3] = color[0];
+			buffer[(y * WIDTH + x) * 3 + 1] = color[1];
+			buffer[(y * WIDTH + x) * 3 + 2] = color[2];
+		}
+	}
+	//k>=1 
+	if (k >= 1.0)
+	{
+		p = dy;
+		while (y<y2)
+		{
+			y++;
+			if (p<0)
+				p += twoDx;
+			else
+			{
+				x++;
+				p += twoMinusDy;
+			}
+			if (((y * WIDTH + x) * 3 + 2) >(WIDTH * HEIGHT * 3 - 1)) continue;
+			if ((y * WIDTH + x) * 3 + 2 < 0) continue;
+			if (y >= WIDTH - 1 || x >= WIDTH - 1) continue;
+			if (y < 0 || x < 0) continue;
+			buffer[(y * WIDTH + x) * 3] = color[0];
+			buffer[(y * WIDTH + x) * 3 + 1] = color[1];
+			buffer[(y * WIDTH + x) * 3 + 2] = color[2];
+		}
+	}
+	//0>k>-1
+	if (k>-1 && k<0)
+	{
+		p = 2 * dy + dx;
+		while (x<x2)
+		{
+			x++;
+			if (p >= 0)
+				p += twoDy;
+			else
+			{
+				y--;
+				p += twoSum;
+			}
+			if (((y * WIDTH + x) * 3 + 2) >(WIDTH * HEIGHT * 3 - 1)) continue;
+			if ((y * WIDTH + x) * 3 + 2 < 0) continue;
+			if (y >= WIDTH - 1 || x >= WIDTH - 1) continue;
+			if (y < 0 || x < 0) continue;
+			buffer[(y * WIDTH + x) * 3] = color[0];
+			buffer[(y * WIDTH + x) * 3 + 1] = color[1];
+			buffer[(y * WIDTH + x) * 3 + 2] = color[2];
+		}
+	}
+	//k<-1
+	if (k <= -1)
+	{
+		p = 2 * dx - dy;
+		while (y>y2)
+		{
+			y--;
+			if (p >= 0)
+				p -= twoDx;
+			else
+			{
+				x++;
+				p -= twoSum;
+			}
+			if (((y * WIDTH + x) * 3 + 2) >(WIDTH * HEIGHT * 3 - 1)) continue;
+			if ((y * WIDTH + x) * 3 + 2 < 0) continue;
+			if (y >= WIDTH - 1 || x >= WIDTH - 1) continue;
+			if (y < 0 || x < 0) continue;
+			buffer[(y * WIDTH + x) * 3] = color[0];
+			buffer[(y * WIDTH + x) * 3 + 1] = color[1];
+			buffer[(y * WIDTH + x) * 3 + 2] = color[2];
+		}
+	}
+}
+
+void DrawFlatBottomTriangle(IJVector a,IJVector b,IJVector c,IJColor *color)
+{
+	a = a * 399.5 + IJVector(399.5, 399.5, 0, 0);
+	b = b * 399.5 + IJVector(399.5, 399.5, 0, 0);
+	c = c * 399.5 + IJVector(399.5, 399.5, 0, 0);
+	int x1 = a[0];
+	int y1 = a[1];
+	int x2 = b[0];
+	int y2 = b[1];
+	int x3 = c[0];
+	int y3 = c[1];
+	for (int y = y1; y > y2; --y)
+	{
+		int xs, xe;
+		xs = (y1 - y) * (x2 - x1) / (y1 - y2) + x1;
+		xe = (y1 - y) * (x3 - x1) / (y1 - y3) + x1;
+		drawOneLine(xs, y, xe, y, color);
+	}
+}
+void DrawFlatTopTriangle(IJVector a, IJVector b, IJVector c, IJColor *color)
+{
+	a = a * 399.5 + IJVector(399.5, 399.5, 0, 0);
+	b = b * 399.5 + IJVector(399.5, 399.5, 0, 0);
+	c = c * 399.5 + IJVector(399.5, 399.5, 0, 0);
+	int x1 = a[0];
+	int y1 = a[1];
+	int x2 = b[0];
+	int y2 = b[1];
+	int x3 = c[0];
+	int y3 = c[1];
+	for (int y = y1; y > y3; --y)
+	{
+		int xs, xe;
+		xs = (y1 - y) * (x3 - x1) / (y1 - y3) + x1;
+		xe = (y2 - y) * (x3 - x2) / (y2 - y3) + x2;
+		drawOneLine(xs, y, xe, y, color);
+	}
+}
+void TriangleRasterization(IJTriangle *triangle) {
+	std::sort(triangle->data, (triangle->data) + 3, compare);
+	double xmiddle, deltax = (triangle->data[2][0]) - (triangle->data[0][0]);
+	double portion = ((triangle->data[0][1]) - (triangle->data[1][1]))
+		/ ((triangle->data[0][1]) - (triangle->data[2][1]));
+	double portionx = portion * deltax;
+	xmiddle = triangle->data[0][0] + portionx;
+	if (xmiddle <= triangle->data[1][0]) {
+		DrawFlatBottomTriangle(
+			IJVector(triangle->data[0][0], triangle->data[0][1], 0, 1), 
+			IJVector(xmiddle, triangle->data[1][1], 0, 1),
+			IJVector(triangle->data[1][0], triangle->data[1][1], 0, 1), 
+			triangle->color);
+	    DrawFlatTopTriangle(IJVector(xmiddle, triangle->data[1][1], 0, 1),
+			IJVector(triangle->data[1][0], triangle->data[1][1], 0, 1),
+			IJVector(triangle->data[2][0], triangle->data[2][1], 0, 1), triangle->color);
+	}
+	else {
+		DrawFlatBottomTriangle(
+			IJVector(triangle->data[0][0], triangle->data[0][1], 0, 1),
+			IJVector(triangle->data[1][0], triangle->data[1][1], 0, 1),
+			IJVector(xmiddle, triangle->data[1][1], 0, 1),
+			triangle->color);
+		DrawFlatTopTriangle(IJVector(triangle->data[1][0], triangle->data[1][1], 0, 1),
+			IJVector(xmiddle, triangle->data[1][1], 0, 1),
+			IJVector(triangle->data[2][0], triangle->data[2][1], 0, 1), triangle->color);
+	}
+}
 void FreePatch(IJPatch *data, IJWorld world) {
 	IJuint size = world.shapes.size();
 	for (int shapecount = 0; shapecount < size; shapecount++) {
@@ -66,49 +287,8 @@ bool Linearithmatic(IJVector a, IJVector b, double c, double d) {
 		b[0] * a[1] > 0) return true;
 	else return false;
 }
-void Bresenhamline(int x1, int y1, int x2, int y2, IJColor *color) {
-	int x, y, dx, dy, s1, s2, p, temp, interchange, i; 
-	x = x1; 
-	y = y1;   
-	dx = abs(x2 - x1); 
-	dy = abs(y2 - y1);  
-	if (x2>x1)   s1 = 1; 
-	else   s1 = -1;  
-	if (y2>y1)   s2 = 1;
-	else   s2 = -1;   
-	if (dy>dx) { 
-		temp = dx;  
-		dx = dy;
-		dy = temp;   
-		interchange = 1; 
-	}
-	else  
-		interchange = 0;  
-	p = (dy << 1) - dx; 
-	for (i = 1; i <= dx; i++) {
-		if (((y * WIDTH + x) * 3 + 2) >(WIDTH * HEIGHT * 3 - 1)) continue;
-		if ((y * WIDTH + x) * 3 + 2 < 0) continue;
-		if (y >= WIDTH - 1 || x >= WIDTH - 1) continue;
-		if (y < 0 || x < 0) continue;
-		buffer[(y * WIDTH + x) * 3] = color[0];
-		buffer[(y * WIDTH + x) * 3 + 1] = color[1];
-		buffer[(y * WIDTH + x) * 3 + 2] = color[2];
-		if (p >= 0) {
-			if (interchange == 0) 
-				y = y + s2; 
-			else    
-				x = x + s1;
-			p = p -(dx << 1);
-		}
-		else { 
-			if (interchange == 0) 
-				x = x + s1; 
-			else   
-				y = y + s2;  
-			p = p + (dy << 1);  
-		}
-	}
-}
+
+
 void Line(IJVector a, IJVector b,IJColor *color) {
 	a = a * 399.5 + IJVector(399.5, 399.5, 0, 0);
 	b = b * 399.5 + IJVector(399.5, 399.5, 0, 0);
@@ -116,9 +296,9 @@ void Line(IJVector a, IJVector b,IJColor *color) {
 	int x2 = b[0];
 	int y1 = a[1];
 	int y2 = b[1];
-	Bresenhamline(x1, y1, x2, y2, color);
+	//Bresenhamline(x1, y1, x2, y2, color);
+	drawOneLine(x1, y1, x2, y2, color);
 }
-
 //---------------------------------------------------
 //Core pipeline functions
 //---------------------------------------------------
@@ -213,27 +393,8 @@ IJPatch *VertexShaderStage1(IJWorld world){
 			break;
 		}
 		}
-		return ret;
 	}
-}
-
-IJPatch *RasterizationStage1(IJWorld world, IJPatch *data) {
-	IJuint size = world.shapes.size();
-	for (int shapecount = 0; shapecount < size; shapecount++) {
-		IJuint patchsize = (data + shapecount)->size;
-		for (int primitivecount = 0; primitivecount < patchsize; primitivecount++) {
-			Line(((data + shapecount)->data + primitivecount)->data[0],
-				((data + shapecount)->data + primitivecount)->data[1],
-				((data + shapecount)->data + primitivecount)->color);
-			Line(((data + shapecount)->data + primitivecount)->data[1],
-				((data + shapecount)->data + primitivecount)->data[2],
-				((data + shapecount)->data + primitivecount)->color);
-			Line(((data + shapecount)->data + primitivecount)->data[2],
-				((data + shapecount)->data + primitivecount)->data[0],
-				((data + shapecount)->data + primitivecount)->color);
-		}
-	}
-	return NULL;
+	return ret;
 }
 
 IJPatch *VertexShaderStage2(IJWorld world, IJPatch *data) {
@@ -274,3 +435,25 @@ IJPatch *VertexShaderStage2(IJWorld world, IJPatch *data) {
 	}
 	return data;
 }
+
+IJPatch *RasterizationStage1(IJWorld world, IJPatch *data) {
+	IJuint size = world.shapes.size();
+	for (int shapecount = 0; shapecount < size; shapecount++) {
+		IJuint patchsize = (data + shapecount)->size;
+		for (int primitivecount = 0; primitivecount < patchsize; primitivecount++) {
+			Line(((data + shapecount)->data + primitivecount)->data[0],
+				((data + shapecount)->data + primitivecount)->data[1],
+				((data + shapecount)->data + primitivecount)->color);
+			Line(((data + shapecount)->data + primitivecount)->data[1],
+				((data + shapecount)->data + primitivecount)->data[2],
+				((data + shapecount)->data + primitivecount)->color);
+			Line(((data + shapecount)->data + primitivecount)->data[2],
+				((data + shapecount)->data + primitivecount)->data[0],
+				((data + shapecount)->data + primitivecount)->color);
+			TriangleRasterization((data + shapecount)->data + primitivecount);
+		}
+		
+	}
+	return NULL;
+}
+

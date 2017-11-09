@@ -26,34 +26,35 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE HPrevInstance,
 	for (int i = 0; i < WIDTH * HEIGHT * 3; i++) {
 		buffer[i] = 255;
 	}
-	world.camera.position = IJVector(1, 1, -0.3,1);
-	world.camera.upwards = IJAuxVector(-0.1, 0.1, 1);
-	world.camera.direction = IJAuxVector(-1, -1, 0.4);
+	world.camera.position = IJVector(1,1, 0.4,1);
+	world.camera.upwards = IJAuxVector(-0.1, -0.2, 1);
+	world.camera.direction = IJAuxVector(-1, -1, -0.5);
 	world.camera.type = IJ_ORTHOGRAPHIC;
 	IJShape sphere;
     sphere.data[0] = IJVector(0.0, 0.0, 0.0, 1.0);
 	sphere.radius = 0.7;
 	sphere.type = IJ_SPHERE;
-	sphere.step[0] = 10;
+	sphere.step[0] = 20;
 	sphere.step[1] = 20;
 	sphere.color[0] = 153;
 	sphere.color[1] = 132;
 	sphere.color[3] = 133;
 	world.shapes.push_back(sphere);
-	IJShape cube;
-	cube.data[0] = IJVector(1.0, 0.0, 0.0, 1.0);
-	cube.data[1] = IJVector(0.0, 1.0, 1.0, 1.0);
-	cube.color[0] = 153;
-	cube.color[1] = 132;
-	cube.color[3] = 133;
-	cube.type = IJ_CUBE;
-	world.shapes.push_back(cube);
+	//IJShape cube;
+	//cube.data[0] = IJVector(1.0, 0.0, 0.0, 1.0);
+	//cube.data[1] = IJVector(0.0, 1.0, 1.0, 1.0);
+	//cube.color[0] = 153;
+	//cube.color[1] = 132;
+	//cube.color[3] = 133;
+	//cube.type = IJ_CUBE;
+	//world.shapes.push_back(cube);
     patch = VertexShaderStage1(world);
 	patch = VertexShaderStage2(world, patch);
 	RasterizationStage1(world, patch);
 	FreePatch(patch,world);
 	patch = NULL;
-	//Line(IJVector(1,-1,0,0), IJVector(-1,1,0,0));
+	//IJColor color[3] = { 0,0,0 };
+	//Line(IJVector(-1,0,0,0), IJVector(1,0.1,0,0),color);
 	static TCHAR szAppName[] = TEXT("BitBlt");
 	HWND         hwnd;
 	MSG          msg;
@@ -153,7 +154,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			}
 			world.camera.position = IJVector(
 				world.camera.position[0] + offsetx,
-				world.camera.position[1] - offsety,
+				world.camera.position[1] + offsety,
 				world.camera.position[2],
 				world.camera.position[3]
 			);
