@@ -58,8 +58,7 @@ struct IJShape {
 
 struct IJTriangle {
 	IJVector data[3];
-	IJColor  color[3];
-	IJVector uniform[3];
+	IJColor  color[3][3];
 	IJint zbuffer;
 };
 

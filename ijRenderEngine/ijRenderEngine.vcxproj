@@ -78,7 +78,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>E:\vs\ijRenderEngine\ijRenderEngine\include;E:\vs\ijRenderEngine\ijRenderEngine\extern\Eigen;$(IncludePath)</IncludePath>
+    <IncludePath>.\include;.\extern\Eigen;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
