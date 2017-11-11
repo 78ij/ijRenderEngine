@@ -1,0 +1,18 @@
+
+
+CC = g++
+PATHI = ./ijRenderEngine/include
+PATHE = ./ijRenderEngine/extern/Eigen
+PATHSRC = ./ijRenderEngine/src
+
+pipeline.o:${PATHSRC}/pipeline.cpp ${PATHI}/pipeline.h
+	$(CC) -c ${PATHSRC}/pipeline.cpp -I ${PATHI} -I ${PATHE}
+	
+Main.o:${PATHSRC}/Main.cpp
+	$(CC) -c ${PATHSRC}/Main.cpp -I ${PATHI} -I ${PATHE}
+	
+demo.exe:main.o pipeline.o
+	$(CC) Main.o pipeline.o -o demo.exe
+	
+clean:
+		rm -f *.o *.exe 

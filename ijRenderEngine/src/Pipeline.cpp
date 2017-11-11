@@ -82,6 +82,8 @@ void DrawOneLine(int x1, int y1, int x2, int y2, IJColor *color1,IJColor *color2
 	}
 	if (x1 == x2)
 	{
+		if (y1 = y2)
+			return;
 		//pallel to y
 		if (y1 > y2) {
 			y = y2;
@@ -128,9 +130,9 @@ void DrawOneLine(int x1, int y1, int x2, int y2, IJColor *color1,IJColor *color2
 			if (y >= WIDTH - 1 || x >= WIDTH - 1) continue;
 			if (y < 0 || x < 0) continue;
 			if (depthbuffer[y * WIDTH + x] < zbuffer) {
-				buffer[(y * WIDTH + x) * 3] = color1[0] + (color1[0] - color2[0]) * (x - x2) / (x1 - x2);
-				buffer[(y * WIDTH + x) * 3 + 1] = color1[1] + (color1[1] - color2[1]) * (x - x2) / (x1 - x2);
-				buffer[(y * WIDTH + x) * 3 + 2] = color1[2] + (color1[2] - color2[2]) * (x - x2) / (x1 - x2);
+				buffer[(y * WIDTH + x) * 3] = color2[0] + (color1[0] - color2[0]) * (x - x2) / (x1 - x2);
+				buffer[(y * WIDTH + x) * 3 + 1] = color2[1] + (color1[1] - color2[1]) * (x - x2) / (x1 - x2);
+				buffer[(y * WIDTH + x) * 3 + 2] = color2[2] + (color1[2] - color2[2]) * (x - x2) / (x1 - x2);
 				depthbuffer[y * WIDTH + x] = zbuffer;
 			}
 
@@ -155,9 +157,9 @@ void DrawOneLine(int x1, int y1, int x2, int y2, IJColor *color1,IJColor *color2
 			if (y >= WIDTH - 1 || x >= WIDTH - 1) continue;
 			if (y < 0 || x < 0) continue;
 			if (depthbuffer[y * WIDTH + x] < zbuffer) {
-				buffer[(y * WIDTH + x) * 3] = color1[0] + (color1[0] - color2[0]) * (y - y2) / (y1 - y2);
-				buffer[(y * WIDTH + x) * 3 + 1] = color1[1] + (color1[1] - color2[1]) * (y - y2) / (y1 - y2);
-				buffer[(y * WIDTH + x) * 3 + 2] = color1[2] + (color1[2] - color2[2]) * (y - y2) / (y1 - y2);
+				buffer[(y * WIDTH + x) * 3] = color2[0] + (color1[0] - color2[0]) * (y - y2) / (y1 - y2);
+				buffer[(y * WIDTH + x) * 3 + 1] = color2[1] + (color1[1] - color2[1]) * (y - y2) / (y1 - y2);
+				buffer[(y * WIDTH + x) * 3 + 2] = color2[2] + (color1[2] - color2[2]) * (y - y2) / (y1 - y2);
 				depthbuffer[y * WIDTH + x] = zbuffer;
 			}
 		}
@@ -181,9 +183,9 @@ void DrawOneLine(int x1, int y1, int x2, int y2, IJColor *color1,IJColor *color2
 			if (y >= WIDTH - 1 || x >= WIDTH - 1) continue;
 			if (y < 0 || x < 0) continue;
 			if (depthbuffer[y * WIDTH + x] < zbuffer) {
-				buffer[(y * WIDTH + x) * 3] = color1[0] + (color1[0] - color2[0]) * (x - x2) / (x1 - x2);
-				buffer[(y * WIDTH + x) * 3 + 1] = color1[1] + (color1[1] - color2[1]) * (x - x2) / (x1 - x2);
-				buffer[(y * WIDTH + x) * 3 + 2] = color1[2] + (color1[2] - color2[2]) * (x - x2) / (x1 - x2);
+				buffer[(y * WIDTH + x) * 3] = color2[0] + (color1[0] - color2[0]) * (x - x2) / (x1 - x2);
+				buffer[(y * WIDTH + x) * 3 + 1] = color2[1] + (color1[1] - color2[1]) * (x - x2) / (x1 - x2);
+				buffer[(y * WIDTH + x) * 3 + 2] = color2[2] + (color1[2] - color2[2]) * (x - x2) / (x1 - x2);
 				depthbuffer[y * WIDTH + x] = zbuffer;
 			}
 		}
@@ -207,9 +209,9 @@ void DrawOneLine(int x1, int y1, int x2, int y2, IJColor *color1,IJColor *color2
 			if (y >= WIDTH - 1 || x >= WIDTH - 1) continue;
 			if (y < 0 || x < 0) continue;
 			if (depthbuffer[y * WIDTH + x] < zbuffer) {
-				buffer[(y * WIDTH + x) * 3] = color1[0] + (color1[0] - color2[0]) * (y - y2) / (y1 - y2);
-				buffer[(y * WIDTH + x) * 3 + 1] = color1[1] + (color1[1] - color2[1]) * (y - y2) / (y1 - y2);
-				buffer[(y * WIDTH + x) * 3 + 2] = color1[2] + (color1[2] - color2[2]) * (y - y2) / (y1 - y2);
+				buffer[(y * WIDTH + x) * 3] = color2[0] + (color1[0] - color2[0]) * (y - y2) / (y1 - y2);
+				buffer[(y * WIDTH + x) * 3 + 1] = color2[1] + (color1[1] - color2[1]) * (y - y2) / (y1 - y2);
+				buffer[(y * WIDTH + x) * 3 + 2] = color2[2] + (color1[2] - color2[2]) * (y - y2) / (y1 - y2);
 				depthbuffer[y * WIDTH + x] = zbuffer;
 			}
 		}
@@ -227,6 +229,8 @@ void DrawFlatBottomTriangle(IJVector a,IJVector b,IJVector c,IJColor *color1,IJC
 	int y2 = b[1];
 	int x3 = c[0];
 	int y3 = c[1];
+	DrawOneLine(x1, y1, x2, y2, color1, color2, zbuffer);
+	DrawOneLine(x1, y1, x3, y3, color1, color3, zbuffer);
 	for (int y = y1; y > y2; --y)
 	{
 		int xs, xe;
@@ -256,6 +260,8 @@ void DrawFlatTopTriangle(IJVector a, IJVector b, IJVector c, IJColor *color1, IJ
 	int y2 = b[1];
 	int x3 = c[0];
 	int y3 = c[1];
+	DrawOneLine(x1, y1, x3, y3, color1, color3, zbuffer);
+	DrawOneLine(x2, y2, x3, y3, color2, color3, zbuffer);
 	for (int y = y1; y > y3; --y)
 	{
 		IJColor colors[3] = {
@@ -365,22 +371,22 @@ void Line(IJVector a, IJVector b,IJColor *color) {
 }
 void BlinnPhong(IJWorld world, IJVector point, IJVector normal, IJColor *color) {
 	double brightness;
-	normal.normalize();
 	IJAuxVector norm(normal[0], normal[1], normal[2]);
+	norm.normalize();
 	IJVector direction = world.light.position - point;
-	direction.normalize();
 	IJAuxVector dir(direction[0], direction[1], direction[2]);
+	dir.normalize();
 	IJVector viewposition = world.camera.position - point;
-	viewposition.normalize();
 	IJAuxVector view(viewposition[0], viewposition[1], viewposition[2]);
+	view.normalize();
 	IJAuxVector half = (dir + view);
 	half.normalize();
 	double temp = half.dot(norm);
-	brightness = std::pow(max(temp, 0), 0.99);
+	brightness = 0.5 * max(dir.dot(norm),0.0) + 0.5 * std::pow(max(temp, 0.0), 8);
 	BYTE coloroffset = brightness * 255;
-	color[0] = ((color[0] + coloroffset * 0.1) > 255) ? 255 : color[0] + coloroffset * 0.1;
-	color[1] = ((color[1] + coloroffset * 0.6) > 255) ? 255 : color[1] + coloroffset * 0.6;
-	color[2] = ((color[2] + coloroffset * 0.3) > 255) ? 255 : color[2] + coloroffset * 0.3;
+	color[0] = ((color[0] + coloroffset ) > 255) ? 255 : color[0] + coloroffset; //* 0.1;
+	color[1] = ((color[1] + coloroffset ) > 255) ? 255 : color[1] + coloroffset; //* 0.6;
+	color[2] = ((color[2] + coloroffset ) > 255) ? 255 : color[2] + coloroffset; //* 0.3;
 }
 //---------------------------------------------------
 //Core pipeline functions
@@ -528,15 +534,6 @@ IJPatch *RasterizationStage1(IJWorld world, IJPatch *data) {
 	for (int shapecount = 0; shapecount < size; shapecount++) {
 		IJuint patchsize = (data + shapecount)->size;
 		for (int primitivecount = 0; primitivecount < patchsize; primitivecount++) {
-			//Line(((data + shapecount)->data + primitivecount)->data[0],
-			//	((data + shapecount)->data + primitivecount)->data[1],
-			//	((data + shapecount)->data + primitivecount)->color);
-			//Line(((data + shapecount)->data + primitivecount)->data[1],
-			//	((data + shapecount)->data + primitivecount)->data[2],
-			//	((data + shapecount)->data + primitivecount)->color);
-			//Line(((data + shapecount)->data + primitivecount)->data[2],
-			//	((data + shapecount)->data + primitivecount)->data[0],
-			//	((data + shapecount)->data + primitivecount)->color);
 			TriangleRasterization((data + shapecount)->data + primitivecount);
 		}
 		

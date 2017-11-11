@@ -30,7 +30,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE HPrevInstance,
 	for (int i = 0; i < WIDTH * HEIGHT; i++) {
 		depthbuffer[i] = -1500;
 	}
-	world.light.position = IJVector(1, 1, 3, 0);
+	world.light.position = IJVector(3, 2, 3, 0);
 	world.camera.position = IJVector(1,1, 0,0);
 	world.camera.upwards = IJAuxVector(0, 0, 1);
 	world.camera.direction = IJAuxVector(-1, -1, 0);
@@ -39,11 +39,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE HPrevInstance,
     sphere.data[0] = IJVector(0.0, 0.0, 0.0, 1.0);
 	sphere.radius = 0.7;
 	sphere.type = IJ_SPHERE;
-	sphere.step[0] = 40;
-	sphere.step[1] = 40;
-	sphere.color[0] = 153;
-	sphere.color[1] = 132;
-	sphere.color[3] = 133;
+	sphere.step[0] = 200;
+	sphere.step[1] = 200;
+	sphere.color[0] = 135;
+	sphere.color[1] = 145;
+	sphere.color[2] = 0;
 	world.shapes.push_back(sphere);
 	//IJShape cube;
 	//cube.data[0] = IJVector(1.0, 0.0, 0.0, 1.0);
