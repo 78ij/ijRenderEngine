@@ -11,8 +11,7 @@ pipeline.o:${PATHSRC}/pipeline.cpp ${PATHI}/pipeline.h
 Main.o:${PATHSRC}/Main.cpp
 	$(CC) -c ${PATHSRC}/Main.cpp -I ${PATHI} -I ${PATHE}
 	
-demo.exe:main.o pipeline.o
-	$(CC) Main.o pipeline.o -o demo.exe
-	
+all:main.o pipeline.o
+	$(CC) Main.o pipeline.o -o demo.exe -lgdi32
 clean:
 		rm -f *.o *.exe 

@@ -39,8 +39,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE HPrevInstance,
     sphere.data[0] = IJVector(0.0, 0.0, 0.0, 1.0);
 	sphere.radius = 0.7;
 	sphere.type = IJ_SPHERE;
-	sphere.step[0] = 200;
-	sphere.step[1] = 200;
+	sphere.step[0] = 20;
+	sphere.step[1] = 20;
 	sphere.color[0] = 135;
 	sphere.color[1] = 145;
 	sphere.color[2] = 0;

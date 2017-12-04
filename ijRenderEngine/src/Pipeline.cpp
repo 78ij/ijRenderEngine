@@ -9,43 +9,29 @@
 //global buffer
 BYTE buffer[WIDTH * HEIGHT * 3];
 IJint depthbuffer[WIDTH * HEIGHT];
-
+using std::swap;
+using std::max;
 //---------------------------------------------------
 //Auxiliry functions used to calculate vertices,etc
 //---------------------------------------------------
-template<class T>
-void swap(T &x1, T &x2) {
-	T temp = x1;
-	x1 = x2;
-	x2 = temp;
-}
-template<class T>
-void swap2(T x1[3], T x2[3]) {
-	int temp;
-	for (int i = 0; i < 3; i++) {
-		temp = x1[i];
-		x1[i] = x2[i];
-		x2[i] = temp;
-	}
-}
 bool compare(IJVector a, IJVector b) {
 	return a[1] < b[1];
 }
 void SortColor(IJTriangle *triangle){
 	if (compare(triangle->data[0], triangle->data[1])) {
-		swap2<IJColor>((triangle->color[0]), (triangle->color[1]));
+		swap((triangle->color[0]), (triangle->color[1]));
 		swap(triangle->data[0], triangle->data[1]);
 	}
 	if (compare(triangle->data[1], triangle->data[2])) {
-		swap2(triangle->color[1], triangle->color[2]);
+		swap(triangle->color[1], triangle->color[2]);
 		swap(triangle->data[1], triangle->data[2]);
 	}
 	if (compare(triangle->data[0], triangle->data[1])) {
-		swap2(triangle->color[0], triangle->color[1]);
+		swap(triangle->color[0], triangle->color[1]);
 		swap(triangle->data[0], triangle->data[1]);
 	}
 	if (compare(triangle->data[1], triangle->data[2])) {
-		swap2(triangle->color[1], triangle->color[2]);
+		swap(triangle->color[1], triangle->color[2]);
 		swap(triangle->data[1], triangle->data[2]);
 	}
 }
@@ -72,9 +58,9 @@ void DrawOneLine(int x1, int y1, int x2, int y2, IJColor *color1,IJColor *color2
 			if (y >= WIDTH - 1 || x >= WIDTH - 1) continue;
 			if (y < 0 || x < 0) continue;
 			if(depthbuffer[y * WIDTH + x] < zbuffer){
-				buffer[(y * WIDTH + x) * 3] = color2[0] + (color1[0] - color2[0]) * (x - x2) / (x1 - x2);
-				buffer[(y * WIDTH + x) * 3 + 1] = color2[1] + (color1[1] - color2[1]) * (x - x2) / (x1 - x2);
-				buffer[(y * WIDTH + x) * 3 + 2] = color2[2] + (color1[2] - color2[2]) * (x - x2) / (x1 - x2);
+				buffer[(y * WIDTH + x) * 3] = color1[0] + (color2[0] - color1[0]) * (x - x1) / (x2 - x1);
+				buffer[(y * WIDTH + x) * 3 + 1] = color1[1] + (color2[1] - color1[1]) * (x - x1) / (x2 - x1);
+				buffer[(y * WIDTH + x) * 3 + 2] = color1[2] + (color2[2] - color1[2]) * (x - x1) / (x2 - x1);
 				depthbuffer[y * WIDTH + x] = zbuffer;
 			}
 		}
@@ -97,9 +83,9 @@ void DrawOneLine(int x1, int y1, int x2, int y2, IJColor *color1,IJColor *color2
 			if (y >= WIDTH - 1 || x >= WIDTH - 1) continue;
 			if (y < 0 || x < 0) continue;
 			if (depthbuffer[y * WIDTH] < zbuffer) {
-				buffer[(y * WIDTH + x) * 3] = color2[0] + (color1[0] - color2[0]) * (y - y2) / (y1 - y2);
-				buffer[(y * WIDTH + x) * 3 + 1] = color2[1] + (color1[1] - color2[1]) * (y - y2) / (y1 - y2);
-				buffer[(y * WIDTH + x) * 3 + 2] = color2[2] + (color1[2] - color2[2]) * (y - y2) / (y1 - y2);
+				buffer[(y * WIDTH + x) * 3] = color1[0] + (color2[0] - color1[0]) * (y - y1) / (y2 - y1);
+				buffer[(y * WIDTH + x) * 3 + 1] = color1[1] + (color2[1] - color1[1]) * (y - y1) / (y2 - y1);
+				buffer[(y * WIDTH + x) * 3 + 2] = color1[2] + (color2[2] - color1[2]) * (y - y1) / (y2 - y1);
 				depthbuffer[y * WIDTH + x] = zbuffer;
 			}
 		}
@@ -130,9 +116,9 @@ void DrawOneLine(int x1, int y1, int x2, int y2, IJColor *color1,IJColor *color2
 			if (y >= WIDTH - 1 || x >= WIDTH - 1) continue;
 			if (y < 0 || x < 0) continue;
 			if (depthbuffer[y * WIDTH + x] < zbuffer) {
-				buffer[(y * WIDTH + x) * 3] = color2[0] + (color1[0] - color2[0]) * (x - x2) / (x1 - x2);
-				buffer[(y * WIDTH + x) * 3 + 1] = color2[1] + (color1[1] - color2[1]) * (x - x2) / (x1 - x2);
-				buffer[(y * WIDTH + x) * 3 + 2] = color2[2] + (color1[2] - color2[2]) * (x - x2) / (x1 - x2);
+				buffer[(y * WIDTH + x) * 3] = color1[0] + (color2[0] - color1[0]) * (x - x1) / (x2 - x1);
+				buffer[(y * WIDTH + x) * 3 + 1] = color1[1] + (color2[1] - color1[1]) * (x - x1) / (x2 - x1);
+				buffer[(y * WIDTH + x) * 3 + 2] = color1[2] + (color2[2] - color1[2]) * (x - x1) / (x2 - x1);
 				depthbuffer[y * WIDTH + x] = zbuffer;
 			}
 
@@ -157,9 +143,9 @@ void DrawOneLine(int x1, int y1, int x2, int y2, IJColor *color1,IJColor *color2
 			if (y >= WIDTH - 1 || x >= WIDTH - 1) continue;
 			if (y < 0 || x < 0) continue;
 			if (depthbuffer[y * WIDTH + x] < zbuffer) {
-				buffer[(y * WIDTH + x) * 3] = color2[0] + (color1[0] - color2[0]) * (y - y2) / (y1 - y2);
-				buffer[(y * WIDTH + x) * 3 + 1] = color2[1] + (color1[1] - color2[1]) * (y - y2) / (y1 - y2);
-				buffer[(y * WIDTH + x) * 3 + 2] = color2[2] + (color1[2] - color2[2]) * (y - y2) / (y1 - y2);
+				buffer[(y * WIDTH + x) * 3] = color1[0] + (color2[0] - color1[0]) * (y - y1) / (y2 - y1);
+				buffer[(y * WIDTH + x) * 3 + 1] = color1[1] + (color2[1] - color1[1]) * (y - y1) / (y2 - y1);
+				buffer[(y * WIDTH + x) * 3 + 2] = color1[2] + (color2[2] - color1[2]) * (y - y1) / (y2 - y1);
 				depthbuffer[y * WIDTH + x] = zbuffer;
 			}
 		}
@@ -183,9 +169,9 @@ void DrawOneLine(int x1, int y1, int x2, int y2, IJColor *color1,IJColor *color2
 			if (y >= WIDTH - 1 || x >= WIDTH - 1) continue;
 			if (y < 0 || x < 0) continue;
 			if (depthbuffer[y * WIDTH + x] < zbuffer) {
-				buffer[(y * WIDTH + x) * 3] = color2[0] + (color1[0] - color2[0]) * (x - x2) / (x1 - x2);
-				buffer[(y * WIDTH + x) * 3 + 1] = color2[1] + (color1[1] - color2[1]) * (x - x2) / (x1 - x2);
-				buffer[(y * WIDTH + x) * 3 + 2] = color2[2] + (color1[2] - color2[2]) * (x - x2) / (x1 - x2);
+				buffer[(y * WIDTH + x) * 3] = color1[0] + (color2[0] - color1[0]) * (x - x1) / (x2 - x1);
+				buffer[(y * WIDTH + x) * 3 + 1] = color1[1] + (color2[1] - color1[1]) * (x - x1) / (x2 - x1);
+				buffer[(y * WIDTH + x) * 3 + 2] = color1[2] + (color2[2] - color1[2]) * (x - x1) / (x2 - x1);
 				depthbuffer[y * WIDTH + x] = zbuffer;
 			}
 		}
@@ -209,9 +195,9 @@ void DrawOneLine(int x1, int y1, int x2, int y2, IJColor *color1,IJColor *color2
 			if (y >= WIDTH - 1 || x >= WIDTH - 1) continue;
 			if (y < 0 || x < 0) continue;
 			if (depthbuffer[y * WIDTH + x] < zbuffer) {
-				buffer[(y * WIDTH + x) * 3] = color2[0] + (color1[0] - color2[0]) * (y - y2) / (y1 - y2);
-				buffer[(y * WIDTH + x) * 3 + 1] = color2[1] + (color1[1] - color2[1]) * (y - y2) / (y1 - y2);
-				buffer[(y * WIDTH + x) * 3 + 2] = color2[2] + (color1[2] - color2[2]) * (y - y2) / (y1 - y2);
+				buffer[(y * WIDTH + x) * 3] = color1[0] + (color2[0] - color1[0]) * (y - y1) / (y2 - y1);
+				buffer[(y * WIDTH + x) * 3 + 1] = color1[1] + (color2[1] - color1[1]) * (y - y1) / (y2 - y1);
+				buffer[(y * WIDTH + x) * 3 + 2] = color1[2] + (color2[2] - color1[2]) * (y - y1) / (y2 - y1);
 				depthbuffer[y * WIDTH + x] = zbuffer;
 			}
 		}
@@ -229,20 +215,20 @@ void DrawFlatBottomTriangle(IJVector a,IJVector b,IJVector c,IJColor *color1,IJC
 	int y2 = b[1];
 	int x3 = c[0];
 	int y3 = c[1];
-	DrawOneLine(x1, y1, x2, y2, color1, color2, zbuffer);
-	DrawOneLine(x1, y1, x3, y3, color1, color3, zbuffer);
+	//DrawOneLine(x1, y1, x2, y2, color2, color1, zbuffer);
+    //DrawOneLine(x1, y1, x3, y3, color1, color3, zbuffer);
 	for (int y = y1; y > y2; --y)
 	{
 		int xs, xe;
 		IJColor colors[3] = {
-			(color1[0] - color2[0]) *  (y1 - y) / (y1 - y2) + color2[0],
-			(color1[1] - color2[1]) *  (y1 - y) / (y1 - y2) + color2[1],
-			(color1[2] - color2[2]) *  (y1 - y) / (y1 - y2) + color2[2]
+			(color1[0] - color2[0]) *  (y2 - y) / (y2 - y1) + color2[0],
+			(color1[1] - color2[1]) *  (y2 - y) / (y2 - y1) + color2[1],
+			(color1[2] - color2[2]) *  (y2 - y) / (y2 - y1) + color2[2]
 		};
 		IJColor colore[3] = {
-			(color1[0] - color3[0]) *  (y1 - y) / (y1 - y2) + color3[0],
-			(color1[1] - color3[1]) *  (y1 - y) / (y1 - y2) + color3[1],
-			(color1[2] - color3[2]) *  (y1 - y) / (y1 - y2) + color3[2]
+			(color1[0] - color3[0]) *  (y2 - y) / (y2 - y1) + color3[0],
+			(color1[1] - color3[1]) *  (y2 - y) / (y2 - y1) + color3[1],
+			(color1[2] - color3[2]) *  (y2 - y) / (y2 - y1) + color3[2]
 		};
 		xs = (y1 - y) * (x2 - x1) / (y1 - y2) + x1;
 		xe = (y1 - y) * (x3 - x1) / (y1 - y3) + x1;
@@ -260,19 +246,19 @@ void DrawFlatTopTriangle(IJVector a, IJVector b, IJVector c, IJColor *color1, IJ
 	int y2 = b[1];
 	int x3 = c[0];
 	int y3 = c[1];
-	DrawOneLine(x1, y1, x3, y3, color1, color3, zbuffer);
-	DrawOneLine(x2, y2, x3, y3, color2, color3, zbuffer);
+	//DrawOneLine(x1, y1, x3, y3, color1, color3, zbuffer);
+	//DrawOneLine(x2, y2, x3, y3, color3, color2, zbuffer);
 	for (int y = y1; y > y3; --y)
 	{
 		IJColor colors[3] = {
-			(color1[0] - color3[0]) *  (y1 - y) / (y1 - y3) + color3[0],
-			(color1[1] - color3[1]) *  (y1 - y) / (y1 - y3) + color3[1],
-			(color1[2] - color3[2]) *  (y1 - y) / (y1 - y3) + color3[2]
+			(color1[0] - color3[0]) *  (y3 - y) / (y3 - y1) + color3[0],
+			(color1[1] - color3[1]) *  (y3 - y) / (y3 - y1) + color3[1],
+			(color1[2] - color3[2]) *  (y3 - y) / (y3 - y1) + color3[2]
 		};
 		IJColor colore[3] = {
-			(color2[0] - color3[0]) *  (y2 - y) / (y2 - y3) + color3[0],
-			(color2[1] - color3[1]) *  (y2 - y) / (y2 - y3) + color3[1],
-			(color2[2] - color3[2]) *  (y2 - y) / (y2 - y3) + color3[2]
+			(color2[0] - color3[0]) *  (y3 - y) / (y3 - y1) + color3[0],
+			(color2[1] - color3[1]) *  (y3 - y) / (y3 - y1) + color3[1],
+			(color2[2] - color3[2]) *  (y3 - y) / (y3 - y1) + color3[2]
 		};
 		int xs, xe;
 		xs = (y1 - y) * (x3 - x1) / (y1 - y3) + x1;
@@ -292,25 +278,29 @@ void TriangleRasterization(IJTriangle *triangle) {
 		(triangle->color[2][1] - triangle->color[0][1]) * portion + triangle->color[0][1],
 		(triangle->color[2][2] - triangle->color[0][2]) * portion + triangle->color[0][2]
 	};
-	if (xmiddle <= triangle->data[1][0]) {
+
+	if (xmiddle >= triangle->data[1][0]) {
 		DrawFlatBottomTriangle(
-			IJVector(triangle->data[0][0], triangle->data[0][1], 0, 1), 
-			IJVector(xmiddle, triangle->data[1][1], 0, 1),
+			IJVector(triangle->data[0][0], triangle->data[0][1], 0, 1), 		
 			IJVector(triangle->data[1][0], triangle->data[1][1], 0, 1), 
-			triangle->color[0],middlecolor,triangle->color[1],triangle->zbuffer);
-	    DrawFlatTopTriangle(IJVector(xmiddle, triangle->data[1][1], 0, 1),
+			IJVector(xmiddle, triangle->data[1][1], 0, 1),
+			triangle->color[0], triangle->color[1], middlecolor,  triangle->zbuffer);
+	    DrawFlatTopTriangle(
 			IJVector(triangle->data[1][0], triangle->data[1][1], 0, 1),
-			IJVector(triangle->data[2][0], triangle->data[2][1], 0, 1), middlecolor,triangle->color[1],triangle->color[2],triangle->zbuffer);
+			IJVector(xmiddle, triangle->data[1][1], 0, 1),
+			IJVector(triangle->data[2][0], triangle->data[2][1], 0, 1),
+			 triangle->color[1], middlecolor, triangle->color[2], triangle->zbuffer);
 	}
 	else {
 		DrawFlatBottomTriangle(
 			IJVector(triangle->data[0][0], triangle->data[0][1], 0, 1),
+			IJVector(xmiddle, triangle->data[1][1], 0, 1),
 			IJVector(triangle->data[1][0], triangle->data[1][1], 0, 1),
-			IJVector(xmiddle, triangle->data[1][1], 0, 1),
-			triangle->color[0], triangle->color[1], middlecolor, triangle->zbuffer);
-		DrawFlatTopTriangle(IJVector(triangle->data[1][0], triangle->data[1][1], 0, 1),
-			IJVector(xmiddle, triangle->data[1][1], 0, 1),
-			IJVector(triangle->data[2][0], triangle->data[2][1], 0, 1), triangle->color[1],middlecolor,triangle->color[2],triangle->zbuffer);
+			triangle->color[0], middlecolor, triangle->color[1], triangle->zbuffer);
+		DrawFlatTopTriangle(IJVector(xmiddle, triangle->data[1][1], 0, 1), 
+			IJVector(triangle->data[1][0], triangle->data[1][1], 0, 1),
+			IJVector(triangle->data[2][0], triangle->data[2][1], 0, 1),
+			middlecolor, triangle->color[1], triangle->color[2] , triangle->zbuffer);
 	}
 }
 void FreePatch(IJPatch *data, IJWorld world) {
