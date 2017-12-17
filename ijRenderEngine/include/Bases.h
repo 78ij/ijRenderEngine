@@ -12,6 +12,8 @@
 #include <cmath>
 #include <vector>
 #include <new>
+#include<omp.h>
+
 #include <algorithm>
 #include <Windows.h>
 
@@ -39,7 +41,7 @@
 //essential math data types
 typedef Eigen::Matrix<double,4,1,Eigen::DontAlign>            IJVector;
 typedef Eigen::Matrix<double, 3, 1, Eigen::DontAlign>         IJAuxVector;
-typedef Eigen::Matrix<double,4,4,Eigen::RowMajor>            IJtransform;
+typedef Eigen::Matrix<double,4,4,Eigen::RowMajor>             IJtransform;
 typedef BYTE                                                  IJColor;
 
 // Returns 0 when the result is below 0

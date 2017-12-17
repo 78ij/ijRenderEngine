@@ -374,9 +374,9 @@ void BlinnPhong(IJWorld world, IJVector point, IJVector normal, IJColor *color) 
 	double temp = half.dot(norm);
 	brightness = 0.5 * max(dir.dot(norm),0.0) + 0.5 * std::pow(max(temp, 0.0), 8);
 	BYTE coloroffset = brightness * 255;
-	color[0] = ((color[0] + coloroffset ) > 255) ? 255 : color[0] + coloroffset; //* 0.1;
-	color[1] = ((color[1] + coloroffset ) > 255) ? 255 : color[1] + coloroffset; //* 0.6;
-	color[2] = ((color[2] + coloroffset ) > 255) ? 255 : color[2] + coloroffset; //* 0.3;
+	color[0] = ((color[0] + coloroffset ) > 255) ? 255 : color[0] + coloroffset;
+	color[1] = ((color[1] + coloroffset ) > 255) ? 255 : color[1] + coloroffset;
+	color[2] = ((color[2] + coloroffset ) > 255) ? 255 : color[2] + coloroffset;
 }
 //---------------------------------------------------
 //Core pipeline functions
@@ -425,10 +425,12 @@ IJPatch *VertexShaderStage1(IJWorld world){
 				}
 			}
 			double ustepinterval = 1 / (double)ustep;
-			double vstepinterval = 1 / (double)(vstep -1 );
-			// the triangles at bottom
-			double u = 0, v = 0;
+			double vstepinterval = 1 / (double)(vstep  );
+			// the triangles at botto
+			
+#pragma omp parallel for
 			for (int i = 0; i < ustep; i++) {
+				double u = ustepinterval * i, v = 0;
 				IJTriangle *triangle = triangles + i;
 				triangle->data[0] = getPoint(u + ustepinterval, vstepinterval, tempshape.data[0], tempshape.radius);
 				triangle->data[1] = getPoint(0, 0, tempshape.data[0], tempshape.radius);
@@ -436,13 +438,14 @@ IJPatch *VertexShaderStage1(IJWorld world){
 				BlinnPhong(world, triangle->data[0], triangle->data[0] - tempshape.data[0], triangle->color[0]);
 				BlinnPhong(world, triangle->data[1], triangle->data[1] - tempshape.data[0], triangle->color[1]);
 				BlinnPhong(world, triangle->data[2], triangle->data[2] - tempshape.data[0], triangle->color[2]);
-				u += ustepinterval;
 			}
-			// the polygons of in the middle
-			u = 0, v = vstep;
-			IJTriangle * triangle1 = triangles + ustep;
+			// the polygons in the middle
+#pragma omp parallel for
 			for (int i = 1; i < vstep - 1; i++) {
 				for (int j = 0; j < ustep; j++) {
+					double u = ustepinterval * j;
+					double v = vstepinterval * i;
+					IJTriangle * triangle1 = triangles + ustep + 2 * ( j +  (i - 1) * ustep);
 					DividePolygon(triangle1, getPoint(u, v, tempshape.data[0], tempshape.radius),
 						getPoint(u, v + vstepinterval, tempshape.data[0], tempshape.radius),
 						getPoint(u + ustepinterval, v + vstepinterval, tempshape.data[0], tempshape.radius),
@@ -453,14 +456,12 @@ IJPatch *VertexShaderStage1(IJWorld world){
 					BlinnPhong(world, (triangle1 + 1)->data[0], (triangle1 + 1)->data[0] - tempshape.data[0], (triangle1 + 1)->color[0]);
 					BlinnPhong(world, (triangle1 + 1)->data[1], (triangle1 + 1)->data[1] - tempshape.data[0], (triangle1 + 1)->color[1]);
 					BlinnPhong(world, (triangle1 + 1)->data[2], (triangle1 + 1)->data[2] - tempshape.data[0], (triangle1 + 1)->color[2]);
-					u += ustepinterval;
-					triangle1 += 2;
 				}
-				v += vstepinterval;
 		    }
 			// the triangles on the top
-			u = 0;
+#pragma omp parallel for
 			for (int i = 0; i < ustep; i++) {
+				double u = ustepinterval * i;
 				IJTriangle *triangle = triangles + ((vstep - 1) * ustep) * 2 - ustep + i;
 				triangle->data[0] = getPoint(0, 1, tempshape.data[0], tempshape.radius);
 				triangle->data[1] = getPoint(u, 1 - vstepinterval, tempshape.data[0], tempshape.radius);
@@ -468,7 +469,6 @@ IJPatch *VertexShaderStage1(IJWorld world){
 				BlinnPhong(world, triangle->data[0], triangle->data[0] - tempshape.data[0], triangle->color[0]);
 				BlinnPhong(world, triangle->data[1], triangle->data[1] - tempshape.data[0], triangle->color[1]);
 				BlinnPhong(world, triangle->data[2], triangle->data[2] - tempshape.data[0], triangle->color[2]);
-			    u += ustepinterval;
 			}
 			IJPatch *patch = new(ret + shapecount) IJPatch;
 			patch->data = triangles;
@@ -500,8 +500,10 @@ IJPatch *VertexShaderStage2(IJWorld world, IJPatch *data) {
 			0, 0, 1, -offset[2],
 			0, 0, 0, 1;
 		transform = transform * auxtransform;
+
 		for (int shapecount = 0; shapecount < size; shapecount++) {
 			IJuint patchsize = (data + shapecount)->size;
+#pragma omp parallel for
 			for (int primitivecount = 0; primitivecount < patchsize; primitivecount++) {
 				((data + shapecount)->data + primitivecount)->data[0] = transform *
 					((data + shapecount)->data + primitivecount)->data[0];
@@ -523,6 +525,7 @@ IJPatch *RasterizationStage1(IJWorld world, IJPatch *data) {
 	IJuint size = world.shapes.size();
 	for (int shapecount = 0; shapecount < size; shapecount++) {
 		IJuint patchsize = (data + shapecount)->size;
+#pragma omp parallel for
 		for (int primitivecount = 0; primitivecount < patchsize; primitivecount++) {
 			TriangleRasterization((data + shapecount)->data + primitivecount);
 		}
