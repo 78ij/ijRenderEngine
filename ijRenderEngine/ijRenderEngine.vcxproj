@@ -21,10 +21,13 @@
   <ItemGroup>
     <ClInclude Include="include\Bases.h" />
     <ClInclude Include="include\Pipeline.h" />
+    <ClInclude Include="include\Utilities.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="extern\pystring.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\Pipeline.cpp" />
+    <ClCompile Include="src\Utilities.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
@@ -78,7 +81,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>.\include;.\extern\Eigen;$(IncludePath)</IncludePath>
+    <IncludePath>.\include;.\extern;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -86,6 +89,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <AdditionalOptions>/openmp %(AdditionalOptions)</AdditionalOptions>
+      <PreprocessorDefinitions>_MBCS;WIN32;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

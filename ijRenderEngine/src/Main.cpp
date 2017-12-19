@@ -6,8 +6,10 @@
 
 #include"Bases.h"
 #include"Pipeline.h"
+
 extern BYTE buffer[WIDTH * HEIGHT * 3];
 extern IJint depthbuffer[WIDTH * HEIGHT];
+
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 IJWorld world;
 int originx = 0, originy = 0;
@@ -30,20 +32,20 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE HPrevInstance,
 		depthbuffer[i] = -1500;
 	}
 	world.light.position = IJVector(3, 2, 3, 0);
-	world.camera.position = IJVector(1,1, 0,0);
-	world.camera.upwards = IJAuxVector(0, 0, 1);
+	world.camera.position = IJVector(1,2.2, 0,0);
+	world.camera.upwards = IJAuxVector(0, 1, 0);
 	world.camera.direction = IJAuxVector(-1, -1, 0);
 	world.camera.type = IJ_ORTHOGRAPHIC;
-	IJShape sphere;
-    sphere.data[0] = IJVector(0.0, 0.0, 0.0, 1.0);
-	sphere.radius = 0.7;
+    IJShape bunny;
+	bunny.type = IJ_OBJECT;
+	bunny.object.path = "C:\\Users\\Jiamu Sun\\Desktop\\reconstruction\\bun_zipper.ply";
+	/*IJShape sphere;
 	sphere.type = IJ_SPHERE;
-	sphere.step[0] = 40;
-	sphere.step[1] = 40;
-	sphere.color[0] = 135;
-	sphere.color[1] = 145;
-	sphere.color[2] = 0;
-	world.shapes.push_back(sphere);
+	sphere.data[0] = IJVector(0, 0, 0,1);
+	sphere.step[0] = 30;
+	sphere.step[1] = 30;
+	sphere.radius = 0.5;*/
+	world.shapes.push_back(bunny);
 	//IJShape cube;
 	//cube.data[0] = IJVector(1.0, 0.0, 0.0, 1.0);
 	//cube.data[1] = IJVector(0.0, 1.0, 1.0, 1.0);
@@ -52,11 +54,17 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE HPrevInstance,
 	//cube.color[3] = 133;
 	//cube.type = IJ_CUBE;
 	//world.shapes.push_back(cube);
-    patch = VertexShaderStage1(world);
-	patch = VertexShaderStage2(world, patch);
-	RasterizationStage1(world, patch);
-	FreePatch(patch,world);
-	patch = NULL;
+	try {
+		patch = VertexShaderStage1(world);
+		patch = VertexShaderStage2(world, patch);
+		RasterizationStage1(world, patch);
+		FreePatch(patch, world);
+		patch = NULL;
+	}
+	catch (std::runtime_error &e) {
+		cout << "Runtime exception:\n" << e.what() << endl;
+	}
+
 	//IJColor color[3] = { 0,0,0 };
 	//Line(IJVector(-1,0,0,0), IJVector(1,0.1,0,0),color);
 	static TCHAR szAppName[] = TEXT("BitBlt");

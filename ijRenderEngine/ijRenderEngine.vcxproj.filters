@@ -21,12 +21,21 @@
     <ClInclude Include="include\Pipeline.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="include\Utilities.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Main.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\Pipeline.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Utilities.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="extern\pystring.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
