@@ -9,7 +9,7 @@
 
 //global buffer
 BYTE buffer[WIDTH * HEIGHT * 3];
-IJint depthbuffer[WIDTH * HEIGHT];
+float depthbuffer[WIDTH * HEIGHT];
 
 //---------------------------------------------------
 //Core pipeline functions
@@ -28,9 +28,7 @@ IJPatch *VertexShaderStage1(IJWorld world) {
 			for (int i = 0; i < 12; i++) {
 				IJTriangle *triangle = new(triangles + i) IJTriangle;
 				for (int j = 0; j < 3; j++) {
-					triangle->color[j][0] = tempshape.color[0];
-					triangle->color[j][1] = tempshape.color[1];
-					triangle->color[j][2] = tempshape.color[2];
+					triangle->color[j] = tempshape.color;
 				}
 			}
 			CalculateCubeVertices(tempshape, vertices);
@@ -52,15 +50,12 @@ IJPatch *VertexShaderStage1(IJWorld world) {
 			for (int i = 0; i < ((vstep - 1) * ustep) * 2; i++) {
 				IJTriangle *triangle2 = new(triangles + i) IJTriangle;
 				for (int j = 0; j < 3; j++) {
-					triangle2->color[j][0] = tempshape.color[0];
-					triangle2->color[j][1] = tempshape.color[1];
-					triangle2->color[j][2] = tempshape.color[2];
+					triangle2->color[j] = tempshape.color;
 				}
 			}
 			double ustepinterval = 1 / (double)ustep;
 			double vstepinterval = 1 / (double)(vstep);
-			// the triangles at botto
-
+			// the triangles at the bottom
 #pragma omp parallel for
 			for (int i = 0; i < ustep; i++) {
 				double u = ustepinterval * i, v = 0;
@@ -68,9 +63,9 @@ IJPatch *VertexShaderStage1(IJWorld world) {
 				triangle->data[0] = getPoint(u + ustepinterval, vstepinterval, tempshape.data[0], tempshape.radius);
 				triangle->data[1] = getPoint(0, 0, tempshape.data[0], tempshape.radius);
 				triangle->data[2] = getPoint(u, vstepinterval, tempshape.data[0], tempshape.radius);
-				BlinnPhong(world, triangle->data[0], triangle->data[0] - tempshape.data[0], triangle->color[0]);
-				BlinnPhong(world, triangle->data[1], triangle->data[1] - tempshape.data[0], triangle->color[1]);
-				BlinnPhong(world, triangle->data[2], triangle->data[2] - tempshape.data[0], triangle->color[2]);
+				BlinnPhong(world, triangle->data[0], triangle->data[0] - tempshape.data[0], &triangle->color[0]);
+				BlinnPhong(world, triangle->data[1], triangle->data[1] - tempshape.data[0], &triangle->color[1]);
+				BlinnPhong(world, triangle->data[2], triangle->data[2] - tempshape.data[0], &triangle->color[2]);
 			}
 			// the polygons in the middle
 #pragma omp parallel for
@@ -83,12 +78,12 @@ IJPatch *VertexShaderStage1(IJWorld world) {
 						getPoint(u, v + vstepinterval, tempshape.data[0], tempshape.radius),
 						getPoint(u + ustepinterval, v + vstepinterval, tempshape.data[0], tempshape.radius),
 						getPoint(u + ustepinterval, v, tempshape.data[0], tempshape.radius));
-					BlinnPhong(world, triangle1->data[0], triangle1->data[0] - tempshape.data[0], triangle1->color[0]);
-					BlinnPhong(world, triangle1->data[1], triangle1->data[1] - tempshape.data[0], triangle1->color[1]);
-					BlinnPhong(world, triangle1->data[2], triangle1->data[2] - tempshape.data[0], triangle1->color[2]);
-					BlinnPhong(world, (triangle1 + 1)->data[0], (triangle1 + 1)->data[0] - tempshape.data[0], (triangle1 + 1)->color[0]);
-					BlinnPhong(world, (triangle1 + 1)->data[1], (triangle1 + 1)->data[1] - tempshape.data[0], (triangle1 + 1)->color[1]);
-					BlinnPhong(world, (triangle1 + 1)->data[2], (triangle1 + 1)->data[2] - tempshape.data[0], (triangle1 + 1)->color[2]);
+					BlinnPhong(world, triangle1->data[0], triangle1->data[0] - tempshape.data[0], &triangle1->color[0]);
+					BlinnPhong(world, triangle1->data[1], triangle1->data[1] - tempshape.data[0], &triangle1->color[1]);
+					BlinnPhong(world, triangle1->data[2], triangle1->data[2] - tempshape.data[0], &triangle1->color[2]);
+					BlinnPhong(world, (triangle1 + 1)->data[0], (triangle1 + 1)->data[0] - tempshape.data[0], &(triangle1 + 1)->color[0]);
+					BlinnPhong(world, (triangle1 + 1)->data[1], (triangle1 + 1)->data[1] - tempshape.data[0], &(triangle1 + 1)->color[1]);
+					BlinnPhong(world, (triangle1 + 1)->data[2], (triangle1 + 1)->data[2] - tempshape.data[0], &(triangle1 + 1)->color[2]);
 				}
 			}
 			// the triangles on the top
@@ -99,9 +94,9 @@ IJPatch *VertexShaderStage1(IJWorld world) {
 				triangle->data[0] = getPoint(0, 1, tempshape.data[0], tempshape.radius);
 				triangle->data[1] = getPoint(u, 1 - vstepinterval, tempshape.data[0], tempshape.radius);
 				triangle->data[2] = getPoint(u + ustepinterval, 1 - vstepinterval, tempshape.data[0], tempshape.radius);
-				BlinnPhong(world, triangle->data[0], triangle->data[0] - tempshape.data[0], triangle->color[0]);
-				BlinnPhong(world, triangle->data[1], triangle->data[1] - tempshape.data[0], triangle->color[1]);
-				BlinnPhong(world, triangle->data[2], triangle->data[2] - tempshape.data[0], triangle->color[2]);
+				BlinnPhong(world, triangle->data[0], triangle->data[0] - tempshape.data[0], &triangle->color[0]);
+				BlinnPhong(world, triangle->data[1], triangle->data[1] - tempshape.data[0], &triangle->color[1]);
+				BlinnPhong(world, triangle->data[2], triangle->data[2] - tempshape.data[0], &triangle->color[2]);
 			}
 			IJPatch *patch = new(ret + shapecount) IJPatch;
 			patch->data = triangles;
@@ -121,42 +116,61 @@ IJPatch *VertexShaderStage1(IJWorld world) {
 
 IJPatch *VertexShaderStage2(IJWorld world, IJPatch *data) {
 	IJuint size = world.shapes.size();
-	if (world.camera.type == IJ_ORTHOGRAPHIC) {
-		IJtransform transform;
-		IJtransform auxtransform;
-		IJVector offset = world.camera.position;
-		IJAuxVector w = -1 * world.camera.direction;
-		w = w / w.norm();
-		IJAuxVector u = world.camera.upwards.cross(w);
-		u = u / u.norm();
-		IJAuxVector v = w.cross(u);
-		transform << u[0], u[1], u[2], 0,
-			v[0], v[1], v[2], 0,
-			w[0], w[1], w[2], 0,
-			0, 0, 0, 1;
-		auxtransform << 1, 0, 0, -offset[0],
-			0, 1, 0, -offset[1],
-			0, 0, 1, -offset[2],
-			0, 0, 0, 1;
+	IJtransform transform;
+	IJtransform auxtransform;
+	IJVector offset = world.camera.position;
+	IJAuxVector w = -1 * world.camera.direction;
+	w = w / w.norm();
+	IJAuxVector u = world.camera.upwards.cross(w);
+	u = u / u.norm();
+	IJAuxVector v = w.cross(u);
+	transform << u[0], u[1], u[2], 0,
+		v[0], v[1], v[2], 0,
+		w[0], w[1], w[2], 0,
+		0, 0, 0, 1;
+	auxtransform << 1, 0, 0, -offset[0],
+		0, 1, 0, -offset[1],
+		0, 0, 1, -offset[2],
+		0, 0, 0, 1;
+	if (world.camera.type == IJ_PERSPECTIVE) {
+		double n = world.camera.znear;
+		double f = world.camera.zfar;
+		double r = world.camera.fov;
+		IJtransform perstransform;
+		perstransform << (n / r), 0, 0, 0,
+			0, (n / r), 0, 0,
+			0, 0, -(f + n) / (f - n), -(2 * f * n) / (f - n),
+			0, 0, -1, 0;
+			transform = perstransform *  transform * auxtransform ;
+	}
+	else {
 		transform = transform * auxtransform;
 
-		for (int shapecount = 0; shapecount < size; shapecount++) {
-			IJuint patchsize = (data + shapecount)->size;
+	}
+	for (int shapecount = 0; shapecount < size; shapecount++) {
+		IJuint patchsize = (data + shapecount)->size;
 #pragma omp parallel for
-			for (int primitivecount = 0; primitivecount < patchsize; primitivecount++) {
-				((data + shapecount)->data + primitivecount)->data[0] = transform *
-					((data + shapecount)->data + primitivecount)->data[0];
-				((data + shapecount)->data + primitivecount)->data[1] = transform *
-					((data + shapecount)->data + primitivecount)->data[1];
-				((data + shapecount)->data + primitivecount)->data[2] = transform *
-					((data + shapecount)->data + primitivecount)->data[2];
-				((data + shapecount)->data + primitivecount)->zbuffer =
-					(((data + shapecount)->data + primitivecount)->data[0][2] +
-					((data + shapecount)->data + primitivecount)->data[1][2] +
-					((data + shapecount)->data + primitivecount)->data[2][2]) * 200;
-			}
+		for (int primitivecount = 0; primitivecount < patchsize; primitivecount++) {
+			((data + shapecount)->data + primitivecount)->data[0] = transform *
+				((data + shapecount)->data + primitivecount)->data[0];
+			((data + shapecount)->data + primitivecount)->data[1] = transform *
+				((data + shapecount)->data + primitivecount)->data[1];
+			((data + shapecount)->data + primitivecount)->data[2] = transform *
+				((data + shapecount)->data + primitivecount)->data[2];
+
+			double w =((data + shapecount)->data + primitivecount)->data[0][3];
+			((data + shapecount)->data + primitivecount)->data[0] /= w;
+			w = ((data + shapecount)->data + primitivecount)->data[1][3];
+			((data + shapecount)->data + primitivecount)->data[1] /= w;
+            w = ((data + shapecount)->data + primitivecount)->data[2][3];
+			((data + shapecount)->data + primitivecount)->data[2] /= w;
+			((data + shapecount)->data + primitivecount)->zbuffer =
+				(((data + shapecount)->data + primitivecount)->data[0][2] +
+				((data + shapecount)->data + primitivecount)->data[1][2] +
+					((data + shapecount)->data + primitivecount)->data[2][2]);
 		}
 	}
+
 	return data;
 }
 

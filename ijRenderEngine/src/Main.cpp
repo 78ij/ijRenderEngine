@@ -8,7 +8,7 @@
 #include"Pipeline.h"
 
 extern BYTE buffer[WIDTH * HEIGHT * 3];
-extern IJint depthbuffer[WIDTH * HEIGHT];
+extern float depthbuffer[WIDTH * HEIGHT];
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 IJWorld world;
@@ -32,20 +32,24 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE HPrevInstance,
 		depthbuffer[i] = -1500;
 	}
 	world.light.position = IJVector(3, 2, 3, 0);
-	world.camera.position = IJVector(1,2.2, 0,0);
-	world.camera.upwards = IJAuxVector(0, 1, 0);
-	world.camera.direction = IJAuxVector(-1, -1, 0);
+	world.camera.position = IJVector(-1,0, 0,0);
+	world.camera.upwards = IJAuxVector(0,0 , 1);
+	world.camera.direction = IJAuxVector(1, 0, 0);
+	world.camera.fov = 0.5;
+	world.camera.znear = 0.4;
+	world.camera.zfar = 3;
 	world.camera.type = IJ_ORTHOGRAPHIC;
     IJShape bunny;
 	bunny.type = IJ_OBJECT;
 	bunny.object.path = "C:\\Users\\Jiamu Sun\\Desktop\\reconstruction\\bun_zipper.ply";
-	/*IJShape sphere;
+	IJShape sphere;
 	sphere.type = IJ_SPHERE;
 	sphere.data[0] = IJVector(0, 0, 0,1);
-	sphere.step[0] = 30;
-	sphere.step[1] = 30;
-	sphere.radius = 0.5;*/
-	world.shapes.push_back(bunny);
+	sphere.step[0] = 40;
+	sphere.step[1] = 40;
+	sphere.radius = 0.5;
+	world.shapes.push_back(sphere);
+	//world.shapes.push_back(bunny);
 	//IJShape cube;
 	//cube.data[0] = IJVector(1.0, 0.0, 0.0, 1.0);
 	//cube.data[1] = IJVector(0.0, 1.0, 1.0, 1.0);

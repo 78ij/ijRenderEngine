@@ -54,7 +54,6 @@
 typedef Eigen::Matrix<double,4,1,Eigen::DontAlign>            IJVector;
 typedef Eigen::Matrix<double, 3, 1, Eigen::DontAlign>         IJAuxVector;
 typedef Eigen::Matrix<double,4,4,Eigen::RowMajor>             IJtransform;
-typedef BYTE                                                  IJColor;
 
 using std::swap;
 using std::max;
@@ -69,21 +68,98 @@ using std::fstream;
 using std::exception;
 using pystring::split; 
 
-// Returns 0 when the result is below 0
-inline double ClampedCos(double angle) { 
-	return std::cos(angle) < 0 ? 0 :
-		std::cos(angle);
+
+template<class T>
+inline T Clampmin(T value,T min) { 
+	return value < min ? min : value;
 }  
+
+template<class T>
+inline T Clampmax(T value, T max) {
+	return value > max ? max : value;
+}
+
+template<class T>
+inline T Clamp(T value, T max, T min) {
+	T ret;
+	ret = Clampmax(value, max);
+	ret = Clampmin(ret, min);
+	return ret;
+} 
+
+class IJColor {
+public:
+	IJColor() = default;
+	BYTE r;
+	BYTE g;
+	BYTE b;
+	IJColor(BYTE _r, BYTE _g, BYTE _b) {
+		r = _r;
+		g = _g;
+		b = _b;
+	}
+	inline IJColor &operator+(const IJColor &rhs);
+	inline IJColor &operator-(const IJColor &rhs);
+	inline IJColor &operator*(const int &rhs);
+	inline IJColor &operator*(const double &rhs);
+	inline IJColor &operator/(const int &rhs);
+	inline IJColor &operator+(const BYTE &rhs);
+};
+
+IJColor & IJColor::operator+(const IJColor &rhs) {
+	r = Clamp<int>(rhs.r + r ,255, 0);
+	g = Clamp<int>(rhs.r + g, 255, 0);
+	b = Clamp<int>(rhs.r + b, 255, 0);
+	return *this;
+}
+
+IJColor & IJColor::operator-(const IJColor &rhs) {
+	r = Clamp<int>(r - rhs.r, 255, 0);
+	g = Clamp<int>(g - rhs.g, 255, 0);
+	b = Clamp<int>(b - rhs.b, 255, 0);
+	return *this;
+}
+
+IJColor & IJColor::operator*(const int &rhs) {
+	r = Clamp<int>(rhs * r, 255, 0);
+	g = Clamp<int>(rhs * g, 255, 0);
+	b = Clamp<int>(rhs * b, 255, 0);
+	return *this;
+}
+
+IJColor & IJColor::operator*(const double &rhs) {
+	r = Clamp<double>(rhs * r, 255, 0);
+	g = Clamp<double>(rhs * g, 255, 0);
+	b = Clamp<double>(rhs * b, 255, 0);
+	return *this;
+} 
+
+IJColor & IJColor::operator/(const int &rhs) {
+	r = Clamp<int>(r / rhs, 255, 0);
+	g = Clamp<int>(g / rhs, 255, 0);
+	b = Clamp<int>(b / rhs, 255, 0);
+	return *this;
+}
+
+IJColor & IJColor::operator+(const BYTE &rhs) {
+	r = Clamp<int>(rhs + r, 255, 0);
+	g = Clamp<int>(rhs + g, 255, 0);
+	b = Clamp<int>(rhs + b, 255, 0);
+	return *this;
+}
+
 
 class IJTriangle {
 public:
+	IJTriangle() = default;
 	IJVector data[3];
-	IJColor  color[3][3];
-	IJint zbuffer;
+	IJColor  color[3];
+	float zbuffer;
 };
 
 class IJObject {
 public:
+	IJObject() = default;
 	IJTriangle *triangles;
 	IJint size;
 	string path;
@@ -91,10 +167,11 @@ public:
 
 class IJShape {
 public:
+	IJShape() = default;
 	IJuint type;// cube,sphere,rectangle
 	double radius; // aviliable only for spheres.
     IJVector data[4];
-	IJColor  color[3];
+	IJColor  color;
 	IJuint step[2];    // aviliable only for spheres.
 	IJObject object;
 };
@@ -102,6 +179,7 @@ public:
 
 class IJPatch {
 public:
+	IJPatch() = default;
 	IJTriangle *data;
 	IJuint size;
 };
@@ -109,19 +187,25 @@ public:
 
 class IJCamera {
 public:
+	IJCamera() = default;
 	IJVector position;
 	IJAuxVector direction;
 	IJAuxVector upwards;
+	double znear;
+	double zfar;
+	double fov;
 	IJuint type;
 };
 
 class IJLight {
 public:
+	IJLight() = default;
 	IJVector position;
 };
 
 class IJWorld {
 public:
+	IJWorld() = default;
 	std::vector<IJShape> shapes;
 	IJCamera camera;
 	IJLight light;
@@ -129,4 +213,3 @@ public:
 
 
 #endif
-

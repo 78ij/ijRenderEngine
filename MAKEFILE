@@ -1,6 +1,6 @@
 CXX = g++
 PATHI = ./ijRenderEngine/include
-PATHE = ./ijRenderEngine/extern/Eigen
+PATHE = ./ijRenderEngine/extern
 PATHSRC = ./ijRenderEngine/src
 
 pipeline.o:${PATHSRC}/pipeline.cpp ${PATHI}/pipeline.h 
